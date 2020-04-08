@@ -2,6 +2,7 @@ package com.lis.clash
 
 import java.awt.EventQueue
 import java.awt.event.ActionListener
+import java.io.File
 import javax.swing.*
 
 class Unit {
@@ -126,6 +127,7 @@ class ClashSaveEditor(title: String) : JFrame() {
         openButton.addActionListener(ActionListener {
             //Create a file chooser
             val fc = JFileChooser();
+            fc.currentDirectory = File("./save");
             val returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 val file = fc.selectedFile
