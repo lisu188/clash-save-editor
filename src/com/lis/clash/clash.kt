@@ -1,9 +1,20 @@
 package com.lis.clash
 
 import java.awt.EventQueue
-import java.awt.event.ActionListener
 import java.io.File
-import javax.swing.*
+import java.lang.reflect.Modifier
+import javax.swing.GroupLayout
+import javax.swing.JComponent
+import javax.swing.JFileChooser
+import javax.swing.JFrame
+import javax.swing.table.AbstractTableModel
+import javax.swing.table.TableModel
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.javaGetter
+
 
 class Unit {
     private var exp: Byte
@@ -29,11 +40,19 @@ class Unit {
 }
 
 class Army {
-    private var x: Byte
+    @Column(0)
+    var x: Byte
+
+    @Column(1)
+    var y: Byte
+
+    @Column(2)
+    var player: Byte
+
+    @Column(3)
+    var dir: Byte
+
     private var bytes: List<Byte>
-    private var y: Byte
-    private var player: Byte
-    private var dir: Byte
     private var units: MutableList<Unit> = mutableListOf()
 
     constructor(
@@ -126,8 +145,9 @@ class ClashSaveEditor(title: String) : JFrame() {
         setSize(300, 200)
         setLocationRelativeTo(null)
 
-        val openButton = JButton("Open")
-        openButton.addActionListener(ActionListener {
+        val clashGUI = ClashGUI()
+        val openButton = clashGUI.getLoadButton();
+        openButton.addActionListener {
             //Create a file chooser
             val fc = JFileChooser();
             fc.currentDirectory = File("./save");
@@ -135,14 +155,49 @@ class ClashSaveEditor(title: String) : JFrame() {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 val file = fc.selectedFile
                 val save = parseFile(file.readBytes());
-                print(save)
-            }
-        })
 
-        createLayout(openButton)
+                val dataModel: TableModel = object : AbstractTableModel() {
+                    override fun getColumnName(column: Int): String {
+                        return getProperty(column).name
+                    }
+
+                    override fun getColumnCount(): Int {
+                        return Army::class.memberProperties
+                            .filter { it.hasAnnotation<Column>() }
+                            .size
+                    }
+
+                    override fun getRowCount(): Int {
+                        return save.armies.size
+                    }
+
+                    override fun getValueAt(row: Int, col: Int): Any? {
+                        return getProperty(col)
+                            .get(save.armies.get(row))
+                    }
+
+                    private fun getProperty(col: Int): KProperty1<Army, *> {
+                        return Army::class.memberProperties
+                            .filter { it.findAnnotation<Column>()?.no == col }
+                            .first()
+                    }
+                }
+
+                clashGUI.armyTable.model = dataModel
+            }
+        }
+
+
+        createLayout(clashGUI.mainPanel)
     }
 
 
+}
+
+annotation class Column(val no: Int)
+
+fun isFieldAccessible(property: KProperty1<*, *>): Boolean {
+    return property.javaGetter?.modifiers?.let { !Modifier.isPrivate(it) } ?: false
 }
 
 private fun createAndShowGUI() {

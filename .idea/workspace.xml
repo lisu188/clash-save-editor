@@ -2,18 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5287f727-f5b9-4b2a-acf3-8ae0bd41d0e3" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/$CACHE_FILE$" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/$PRODUCT_WORKSPACE_FILE$" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/KotlinJavaRuntime.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.form" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clash-save-editor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/clash-save-editor.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/clash.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/clash.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,18 +26,13 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Kotlin File" />
+        <option value="JavaFXApplication" />
+        <option value="Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="IgnoredFileRootStore">
-    <option name="generatedRoots">
-      <set>
-        <option value="C:\Users\andrz\git\clash-save-editor" />
-      </set>
-    </option>
   </component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
@@ -57,7 +45,6 @@
         <option name="createModuleGroups" value="true" />
         <option name="downloadDocsAutomatically" value="true" />
         <option name="downloadSourcesAutomatically" value="true" />
-        <option name="importAutomatically" value="true" />
       </MavenImportingSettings>
     </option>
   </component>
@@ -67,7 +54,6 @@
     <option name="autoscrollFromSource" value="true" />
     <option name="autoscrollToSource" value="true" />
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
@@ -83,9 +69,9 @@
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Modules" />
-    <property name="project.structure.proportion" value="0.0" />
-    <property name="project.structure.side.proportion" value="0.0" />
-    <property name="settings.editor.selected.configurable" value="vcs.Subversion" />
+    <property name="project.structure.proportion" value="0.35859376" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -194,6 +180,10 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="734" y="348" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586333965452" />
+    <state x="1129" y="565" key="#com.intellij.uiDesigner.palette.ComponentItemDialog.OneOff" timestamp="1586446896868">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="1129" y="565" key="#com.intellij.uiDesigner.palette.ComponentItemDialog.OneOff/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586446896868" />
     <state x="1125" y="125" key="CommitChangelistDialog2" timestamp="1586335337895">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -203,22 +193,30 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1010" y="398" key="FileChooserDialogImpl/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586333959806" />
-    <state width="2511" height="388" key="GridCell.Tab.0.bottom" timestamp="1586334171175">
+    <state width="2511" height="387" key="GridCell.Tab.0.bottom" timestamp="1586448286931">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2511" height="388" key="GridCell.Tab.0.bottom/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586334171175" />
-    <state width="2511" height="388" key="GridCell.Tab.0.center" timestamp="1586334171175">
+    <state width="2511" height="387" key="GridCell.Tab.0.bottom/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448286931" />
+    <state width="2511" height="387" key="GridCell.Tab.0.center" timestamp="1586448286930">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2511" height="388" key="GridCell.Tab.0.center/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586334171175" />
-    <state width="2511" height="388" key="GridCell.Tab.0.left" timestamp="1586334171175">
+    <state width="2511" height="387" key="GridCell.Tab.0.center/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448286930" />
+    <state width="2511" height="387" key="GridCell.Tab.0.left" timestamp="1586448286930">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2511" height="388" key="GridCell.Tab.0.left/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586334171175" />
-    <state width="2511" height="388" key="GridCell.Tab.0.right" timestamp="1586334171175">
+    <state width="2511" height="387" key="GridCell.Tab.0.left/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448286930" />
+    <state width="2511" height="387" key="GridCell.Tab.0.right" timestamp="1586448286930">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2511" height="388" key="GridCell.Tab.0.right/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586334171175" />
+    <state width="2511" height="387" key="GridCell.Tab.0.right/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448286930" />
+    <state x="982" y="333" key="RollbackChangesDialog" timestamp="1586445944978">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="982" y="333" key="RollbackChangesDialog/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586445944978" />
+    <state x="664" y="258" key="SettingsEditor" timestamp="1586447483182">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="664" y="258" key="SettingsEditor/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586447483182" />
     <state x="772" y="368" key="Vcs.Push.Dialog.v2" timestamp="1586335339786">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -229,16 +227,13 @@
     </state>
     <state x="892" y="483" key="com.intellij.ide.util.TipDialog/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586333789668" />
     <state x="892" y="483" key="com.intellij.ide.util.TipDialog/0.0.2560.1400@0.0.2560.1400" timestamp="1586335304548" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/com/lis/clash/clash.kt</url>
-          <line>134</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <state x="536" y="283" key="new project wizard" timestamp="1586445478417">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="536" y="283" key="new project wizard/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586445478417" />
+    <state x="852" y="175" width="840" height="1032" key="search.everywhere.popup" timestamp="1586446993988">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="852" y="175" width="840" height="1032" key="search.everywhere.popup/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586446993988" />
   </component>
 </project>
