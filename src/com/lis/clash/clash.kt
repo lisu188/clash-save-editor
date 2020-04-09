@@ -52,16 +52,19 @@ class Army {
 
 
 class Save {
+    private var name: String
     private var bytes: List<Byte>
     var tiles: MutableList<Tile> = mutableListOf()
     var armies: MutableList<Army> = mutableListOf()
+
 
     constructor(
         _bytes: List<Byte>
     ) {
         bytes = _bytes
+        name = String(bytes.slice(0 until 16).toByteArray())
         for (i in 0 until 10000) {
-            tiles.add(i, Tile(bytes.slice(i * 14 until ((i + 1) * 14))))
+            tiles.add(i, Tile(bytes.slice(16 + i * 14 until (16 + (i + 1) * 14))))
         }
         for (i in 0 until 500) {
             armies.add(i, Army(bytes.slice(147190 + i * 725 until (147190 + (i + 1) * 725))))
