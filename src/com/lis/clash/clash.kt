@@ -7,29 +7,36 @@ import javax.swing.GroupLayout
 import javax.swing.JComponent
 import javax.swing.JFileChooser
 import javax.swing.JFrame
-import javax.swing.table.AbstractTableModel
 import javax.swing.table.TableModel
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaGetter
 
 
-class Unit {
-    private var exp: Byte
-    private var morale: Byte
-    private var shout: Byte
-    private var health: Byte
-    private var move: Byte
-    private var type: Byte
-    private var bytes: List<Byte>
+class Unit(_bytes: List<Byte>) {
+
+    @Column(5)
+    var exp: Byte
+
+    @Column(4)
+    var morale: Byte
+
+    @Column(3)
+    var shout: Byte
+
+    @Column(2)
+    var health: Byte
+
+    @Column(1)
+    var move: Byte
+
+    @Column(0)
+    var type: Byte
+
+    @Column(6)
+    var bytes: List<Byte> = _bytes
 
 
-    constructor(
-        _bytes: List<Byte>
-    ) {
-        bytes = _bytes
+    init {
         type = bytes[0]
         move = bytes[8]
         health = bytes[9]
@@ -39,7 +46,7 @@ class Unit {
     }
 }
 
-class Army {
+class Army(_bytes: List<Byte>) {
     @Column(0)
     var x: Byte
 
@@ -52,41 +59,45 @@ class Army {
     @Column(3)
     var dir: Byte
 
-    private var bytes: List<Byte>
-    private var units: MutableList<Unit> = mutableListOf()
+    @Column(4)
+    var bytes: List<Byte> = _bytes
 
-    constructor(
-        _bytes: List<Byte>
-    ) {
-        bytes = _bytes
+    var units: MutableList<Unit> = mutableListOf()
+
+    init {
         x = bytes[0]
         y = bytes[2]
         player = bytes[4]
         dir = bytes[5]
         for (i in 0 until 10) {
-            units.add(i, Unit(bytes.slice(6 + i * 31 until (6 + (i + 1) * 31))))
+            val element = Unit(bytes.slice(6 + i * 31 until (6 + (i + 1) * 31)))
+            if (element.type.compareTo(-1) == 0) {
+                break;
+            }
+            units.add(i, element)
         }
     }
 }
 
 
-class Save {
+class Save(_bytes: List<Byte>) {
     private var name: String
-    private var bytes: List<Byte>
+    private var bytes: List<Byte> = _bytes
     var tiles: MutableList<Tile> = mutableListOf()
     var armies: MutableList<Army> = mutableListOf()
 
 
-    constructor(
-        _bytes: List<Byte>
-    ) {
-        bytes = _bytes
+    init {
         name = String(bytes.slice(0 until 16).toByteArray())
         for (i in 0 until 10000) {
             tiles.add(i, Tile(bytes.slice(16 + i * 14 until (16 + (i + 1) * 14))))
         }
         for (i in 0 until 500) {
-            armies.add(i, Army(bytes.slice(147190 + i * 725 until (147190 + (i + 1) * 725))))
+            val element = Army(bytes.slice(147190 + i * 725 until (147190 + (i + 1) * 725)))
+            if (element.units.size == 0) {
+                break;
+            }
+            armies.add(i, element)
         }
     }
 }
@@ -156,34 +167,13 @@ class ClashSaveEditor(title: String) : JFrame() {
                 val file = fc.selectedFile
                 val save = parseFile(file.readBytes());
 
-                val dataModel: TableModel = object : AbstractTableModel() {
-                    override fun getColumnName(column: Int): String {
-                        return getProperty(column).name
-                    }
-
-                    override fun getColumnCount(): Int {
-                        return Army::class.memberProperties
-                            .filter { it.hasAnnotation<Column>() }
-                            .size
-                    }
-
-                    override fun getRowCount(): Int {
-                        return save.armies.size
-                    }
-
-                    override fun getValueAt(row: Int, col: Int): Any? {
-                        return getProperty(col)
-                            .get(save.armies.get(row))
-                    }
-
-                    private fun getProperty(col: Int): KProperty1<Army, *> {
-                        return Army::class.memberProperties
-                            .filter { it.findAnnotation<Column>()?.no == col }
-                            .first()
-                    }
-                }
+                val dataModel: TableModel = buildTable(save.armies)
 
                 clashGUI.armyTable.model = dataModel
+
+                clashGUI.armyTable.selectionModel.addListSelectionListener {
+                    clashGUI.unitTable.model = buildTable(save.armies[clashGUI.armyTable.selectedRow].units)
+                }
             }
         }
 
@@ -194,7 +184,6 @@ class ClashSaveEditor(title: String) : JFrame() {
 
 }
 
-annotation class Column(val no: Int)
 
 fun isFieldAccessible(property: KProperty1<*, *>): Boolean {
     return property.javaGetter?.modifiers?.let { !Modifier.isPrivate(it) } ?: false
