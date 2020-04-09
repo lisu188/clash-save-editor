@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5287f727-f5b9-4b2a-acf3-8ae0bd41d0e3" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.form" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/lis/clash/table.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clash-save-editor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/clash-save-editor.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.form" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.form" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/lis/clash/clash.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/clash.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -25,9 +25,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Kotlin File" />
         <option value="JavaFXApplication" />
         <option value="Class" />
+        <option value="Kotlin File" />
       </list>
     </option>
   </component>
@@ -57,6 +57,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="UI_DESIGNER_EDITOR_MODE.UIDesignerToolWindowManager.WIDTH" value="455" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/save" />
@@ -149,6 +150,7 @@
       <workItem from="1585349584018" duration="30000" />
       <workItem from="1586333789043" duration="382000" />
       <workItem from="1586335300910" duration="646000" />
+      <workItem from="1586452927537" duration="3518000" />
     </task>
     <task id="LOCAL-00001" summary="add save">
       <created>1586334128000</created>
@@ -164,16 +166,24 @@
       <option name="project" value="LOCAL" />
       <updated>1586335338371</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="add gui and table with units">
+      <created>1586448600571</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1586448600571</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="2" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="add save" />
     <MESSAGE value="add iml" />
-    <option name="LAST_COMMIT_MESSAGE" value="add iml" />
+    <MESSAGE value="add gui and table with units" />
+    <option name="LAST_COMMIT_MESSAGE" value="add gui and table with units" />
   </component>
   <component name="WindowStateProjectService">
     <state x="734" y="348" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1586333965452">
@@ -184,31 +194,51 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1129" y="565" key="#com.intellij.uiDesigner.palette.ComponentItemDialog.OneOff/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586446896868" />
-    <state x="1125" y="125" key="CommitChangelistDialog2" timestamp="1586335337895">
+    <state x="1125" y="125" key="CommitChangelistDialog2" timestamp="1586448600030">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="1125" y="125" key="CommitChangelistDialog2/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586334127453" />
+    <state x="1125" y="125" key="CommitChangelistDialog2/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448600030" />
     <state x="1125" y="125" key="CommitChangelistDialog2/0.0.2560.1400@0.0.2560.1400" timestamp="1586335337895" />
     <state x="1010" y="398" key="FileChooserDialogImpl" timestamp="1586333959806">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1010" y="398" key="FileChooserDialogImpl/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586333959806" />
-    <state width="2511" height="387" key="GridCell.Tab.0.bottom" timestamp="1586448286931">
+    <state width="2511" height="478" key="GridCell.Tab.0.bottom" timestamp="1586456343488">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2511" height="387" key="GridCell.Tab.0.bottom/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448286931" />
-    <state width="2511" height="387" key="GridCell.Tab.0.center" timestamp="1586448286930">
+    <state width="2511" height="478" key="GridCell.Tab.0.bottom/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586456343488" />
+    <state width="1871" height="268" key="GridCell.Tab.0.bottom/0.0.2560.1400/2560.0.1920.1040@2560.0.1920.1040" timestamp="1586454864924" />
+    <state width="2511" height="478" key="GridCell.Tab.0.center" timestamp="1586456343488">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2511" height="387" key="GridCell.Tab.0.center/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448286930" />
-    <state width="2511" height="387" key="GridCell.Tab.0.left" timestamp="1586448286930">
+    <state width="2511" height="478" key="GridCell.Tab.0.center/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586456343488" />
+    <state width="1871" height="268" key="GridCell.Tab.0.center/0.0.2560.1400/2560.0.1920.1040@2560.0.1920.1040" timestamp="1586454864923" />
+    <state width="2511" height="478" key="GridCell.Tab.0.left" timestamp="1586456343488">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2511" height="387" key="GridCell.Tab.0.left/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448286930" />
-    <state width="2511" height="387" key="GridCell.Tab.0.right" timestamp="1586448286930">
+    <state width="2511" height="478" key="GridCell.Tab.0.left/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586456343488" />
+    <state width="1871" height="268" key="GridCell.Tab.0.left/0.0.2560.1400/2560.0.1920.1040@2560.0.1920.1040" timestamp="1586454864923" />
+    <state width="2511" height="478" key="GridCell.Tab.0.right" timestamp="1586456343488">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="2511" height="387" key="GridCell.Tab.0.right/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448286930" />
+    <state width="2511" height="478" key="GridCell.Tab.0.right/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586456343488" />
+    <state width="1871" height="268" key="GridCell.Tab.0.right/0.0.2560.1400/2560.0.1920.1040@2560.0.1920.1040" timestamp="1586454864923" />
+    <state width="2511" height="478" key="GridCell.Tab.1.bottom" timestamp="1586456348350">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2511" height="478" key="GridCell.Tab.1.bottom/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586456348350" />
+    <state width="2511" height="478" key="GridCell.Tab.1.center" timestamp="1586456348350">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2511" height="478" key="GridCell.Tab.1.center/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586456348350" />
+    <state width="2511" height="478" key="GridCell.Tab.1.left" timestamp="1586456348350">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2511" height="478" key="GridCell.Tab.1.left/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586456348350" />
+    <state width="2511" height="478" key="GridCell.Tab.1.right" timestamp="1586456348350">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="2511" height="478" key="GridCell.Tab.1.right/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586456348350" />
     <state x="982" y="333" key="RollbackChangesDialog" timestamp="1586445944978">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -217,10 +247,10 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="664" y="258" key="SettingsEditor/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586447483182" />
-    <state x="772" y="368" key="Vcs.Push.Dialog.v2" timestamp="1586335339786">
+    <state x="772" y="368" key="Vcs.Push.Dialog.v2" timestamp="1586448602960">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="772" y="368" key="Vcs.Push.Dialog.v2/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586334129699" />
+    <state x="772" y="368" key="Vcs.Push.Dialog.v2/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586448602960" />
     <state x="772" y="368" key="Vcs.Push.Dialog.v2/0.0.2560.1400@0.0.2560.1400" timestamp="1586335339786" />
     <state x="892" y="483" key="com.intellij.ide.util.TipDialog" timestamp="1586335304548">
       <screen x="0" y="0" width="2560" height="1400" />
@@ -235,5 +265,16 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="852" y="175" width="840" height="1032" key="search.everywhere.popup/0.0.2560.1400/2560.0.1920.1040@0.0.2560.1400" timestamp="1586446993988" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/com/lis/clash/clash.kt</url>
+          <line>174</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
