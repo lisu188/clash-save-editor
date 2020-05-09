@@ -1,6 +1,9 @@
 package com.lis.clash
 
+import java.awt.BorderLayout
 import java.awt.EventQueue
+import java.awt.GridBagConstraints
+import java.awt.GridLayout
 import java.io.File
 import java.lang.reflect.Modifier
 import javax.swing.GroupLayout
@@ -102,17 +105,14 @@ class Save(_bytes: List<Byte>) {
     }
 }
 
-class Tile {
+class Tile(_bytes: List<Byte>) {
     private var subtype: Byte
-    private var bytes: List<Byte>
-    private var type: Byte
+    private var bytes: List<Byte> = _bytes
+    var type: Byte
     private var unknown: Byte
     private var anim: Byte
 
-    constructor(
-        _bytes: List<Byte>
-    ) {
-        bytes = _bytes
+    init {
         type = bytes[0]
         subtype = bytes[2]
         unknown = bytes[4]
@@ -167,13 +167,9 @@ class ClashSaveEditor(title: String) : JFrame() {
                 val file = fc.selectedFile
                 val save = parseFile(file.readBytes());
 
-                val dataModel: TableModel = buildTable(save.armies)
+                initializeUnits(save, clashGUI)
 
-                clashGUI.armyTable.model = dataModel
-
-                clashGUI.armyTable.selectionModel.addListSelectionListener {
-                    clashGUI.unitTable.model = buildTable(save.armies[clashGUI.armyTable.selectedRow].units)
-                }
+                initializeMap(save, clashGUI)
             }
         }
 
@@ -181,7 +177,19 @@ class ClashSaveEditor(title: String) : JFrame() {
         createLayout(clashGUI.mainPanel)
     }
 
+    private fun initializeMap(save: Save, clashGUI: ClashGUI) {
+        clashGUI.mapPanel.tiles=save.tiles
+    }
 
+    private fun initializeUnits(save: Save, clashGUI: ClashGUI) {
+        val dataModel: TableModel = buildTable(save.armies)
+
+        clashGUI.armyTable.model = dataModel
+
+        clashGUI.armyTable.selectionModel.addListSelectionListener {
+            clashGUI.unitTable.model = buildTable(save.armies[clashGUI.armyTable.selectedRow].units)
+        }
+    }
 }
 
 

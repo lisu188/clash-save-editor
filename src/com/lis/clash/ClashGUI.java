@@ -8,6 +8,7 @@ public class ClashGUI {
     private JTable armyTable;
     private JTabbedPane tabbedPane1;
     private JTable unitTable;
+    private MapPanel mapPanel;
 
     public JPanel getMainPanel() {
         return mainPanel;
@@ -23,5 +24,9 @@ public class ClashGUI {
 
     public JTable getUnitTable() {
         return unitTable;
+    }
+
+    public MapPanel getMapPanel() {
+        return mapPanel;
     }
 }
