@@ -1,9 +1,6 @@
 package com.lis.clash
 
-import java.awt.BorderLayout
 import java.awt.EventQueue
-import java.awt.GridBagConstraints
-import java.awt.GridLayout
 import java.io.File
 import java.lang.reflect.Modifier
 import javax.swing.GroupLayout
@@ -106,11 +103,20 @@ class Save(_bytes: List<Byte>) {
 }
 
 class Tile(_bytes: List<Byte>) {
-    private var subtype: Byte
-    private var bytes: List<Byte> = _bytes
+    @Column(1)
+    var subtype: Byte
+
+    @Column(4)
+    var bytes: List<Byte> = _bytes
+
+    @Column(0)
     var type: Byte
-    private var unknown: Byte
-    private var anim: Byte
+
+    @Column(2)
+    var unknown: Byte
+
+    @Column(3)
+    var anim: Byte
 
     init {
         type = bytes[0]
@@ -170,6 +176,8 @@ class ClashSaveEditor(title: String) : JFrame() {
                 initializeUnits(save, clashGUI)
 
                 initializeMap(save, clashGUI)
+
+                initializeTiles(save, clashGUI)
             }
         }
 
@@ -178,7 +186,7 @@ class ClashSaveEditor(title: String) : JFrame() {
     }
 
     private fun initializeMap(save: Save, clashGUI: ClashGUI) {
-        clashGUI.mapPanel.tiles=save.tiles
+        clashGUI.mapPanel.tiles = save.tiles
     }
 
     private fun initializeUnits(save: Save, clashGUI: ClashGUI) {
@@ -189,6 +197,12 @@ class ClashSaveEditor(title: String) : JFrame() {
         clashGUI.armyTable.selectionModel.addListSelectionListener {
             clashGUI.unitTable.model = buildTable(save.armies[clashGUI.armyTable.selectedRow].units)
         }
+    }
+
+    private fun initializeTiles(save: Save, clashGUI: ClashGUI) {
+        val dataModel: TableModel = buildTable(save.tiles)
+
+        clashGUI.tilesTable.model = dataModel
     }
 }
 
