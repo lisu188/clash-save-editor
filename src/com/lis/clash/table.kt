@@ -2,13 +2,20 @@ package com.lis.clash
 
 import javax.swing.table.AbstractTableModel
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
+import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.memberProperties
 
 
-annotation class Column(val no: Int)
+annotation class ClashProperty(val index: Int, val length: Int, val converter: KClass<out Converter>)
+annotation class ClashAggregateProperty(
+    val index: Int,
+    val count: Int,
+    val size: Int,
+    val clas: KClass<out ClashObject>
+)
+
 
 class DynamicTableModel<T : Any>(val _data: List<T>, val dataClass: KClass<T>) : AbstractTableModel() {
 
@@ -18,7 +25,7 @@ class DynamicTableModel<T : Any>(val _data: List<T>, val dataClass: KClass<T>) :
 
     override fun getColumnCount(): Int {
         return dataClass.memberProperties
-            .filter { it.hasAnnotation<Column>() }
+            .filter { it.hasAnnotation<ClashProperty>() }
             .size
     }
 
@@ -27,14 +34,36 @@ class DynamicTableModel<T : Any>(val _data: List<T>, val dataClass: KClass<T>) :
     }
 
     override fun getValueAt(row: Int, col: Int): Any? {
-        return getProperty(col)
-            .get(_data[row])
+        val call = getProperty(col)
+            .getter.call(_data[row])
+        return call
     }
 
-    private fun getProperty(col: Int): KProperty1<T, *> {
+    override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean {
+        return getConverter(columnIndex) != NoneConverter::class.objectInstance;//TODO: validate
+    }
+
+    private fun getConverter(columnIndex: Int) = getAnnotation(columnIndex).converter.objectInstance!!
+
+    override fun setValueAt(aValue: Any, row: Int, col: Int) {
+        getProperty(col).setter.call(_data[row], getConverter(col).fromString(aValue as String))
+    }
+
+    private fun getProperty(col: Int): KMutableProperty<T> {
         return dataClass.memberProperties
-            .filter { it.findAnnotation<Column>()?.no == col }
-            .first()
+            .filter { it.hasAnnotation<ClashProperty>() }
+            .sortedBy { it.findAnnotation<ClashProperty>()?.index }[col]
+                as KMutableProperty<T>
+
+    }
+
+    //TODO: validate annotations
+    private fun getAnnotation(col: Int): ClashProperty {
+        return dataClass.memberProperties
+            .filter { it.hasAnnotation<ClashProperty>() }
+            .sortedBy { it.findAnnotation<ClashProperty>()?.index }[col]
+            .findAnnotation()!!
+
     }
 }
 
