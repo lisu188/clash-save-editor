@@ -2,132 +2,182 @@ package com.lis.clash
 
 import java.awt.EventQueue
 import java.io.File
-import java.lang.reflect.Modifier
 import javax.swing.GroupLayout
 import javax.swing.JComponent
 import javax.swing.JFileChooser
 import javax.swing.JFrame
 import javax.swing.table.TableModel
-import kotlin.reflect.KProperty1
-import kotlin.reflect.jvm.javaGetter
+import kotlin.properties.Delegates
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KProperty
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.memberProperties
 
 
-class Unit(_bytes: List<Byte>) {
+open class ClashObject() {
 
-    @Column(5)
-    var exp: Byte
-
-    @Column(4)
-    var morale: Byte
-
-    @Column(3)
-    var shout: Byte
-
-    @Column(2)
-    var health: Byte
-
-    @Column(1)
-    var move: Byte
-
-    @Column(0)
-    var type: Byte
-
-    @Column(6)
-    var bytes: List<Byte> = _bytes
+    private var bytes: List<Byte> by Delegates.observable(listOf(), { _, oldValue, newValue ->
+        if (oldValue != newValue) {
+            onBytesChanged()
+        }
+    })
 
 
-    init {
-        type = bytes[0]
-        move = bytes[8]
-        health = bytes[9]
-        shout = bytes[10]
-        morale = bytes[11]
-        exp = bytes[12]
-    }
-}
-
-class Army(_bytes: List<Byte>) {
-    @Column(0)
-    var x: Byte
-
-    @Column(1)
-    var y: Byte
-
-    @Column(2)
-    var player: Byte
-
-    @Column(3)
-    var dir: Byte
-
-    @Column(4)
-    var bytes: List<Byte> = _bytes
-
-    var units: MutableList<Unit> = mutableListOf()
-
-    init {
-        x = bytes[0]
-        y = bytes[2]
-        player = bytes[4]
-        dir = bytes[5]
-        for (i in 0 until 10) {
-            val element = Unit(bytes.slice(6 + i * 31 until (6 + (i + 1) * 31)))
-            if (element.type.compareTo(-1) == 0) {
-                break;
+    public fun <T> clashProperty(
+        initialValue: T
+    ): ReadWriteProperty<Any?, T> {
+        return Delegates.observable(initialValue, { property, oldValue, newValue ->
+            if (oldValue != newValue && property.hasAnnotation<ClashProperty>()) {
+                val annotation = getAnnotation<ClashProperty>(property)
+                val toBytes = getConverter(annotation).toBytes(newValue!!)
+                val start = bytes.subList(0, annotation.index)
+                val mid =
+                    if (toBytes.size < annotation.length) toBytes + List(annotation.length - toBytes.size) { -1 } else toBytes
+                val end = bytes.subList(annotation.index + annotation.length, bytes.size)
+                bytes = start + mid + end
             }
-            units.add(i, element)
-        }
+        })
     }
-}
 
-
-class Save(_bytes: List<Byte>) {
-    private var name: String
-    private var bytes: List<Byte> = _bytes
-    var tiles: MutableList<Tile> = mutableListOf()
-    var armies: MutableList<Army> = mutableListOf()
-
-
-    init {
-        name = String(bytes.slice(0 until 16).toByteArray())
-        for (i in 0 until 10000) {
-            tiles.add(i, Tile(bytes.slice(16 + i * 14 until (16 + (i + 1) * 14))))
-        }
-        for (i in 0 until 500) {
-            val element = Army(bytes.slice(147190 + i * 725 until (147190 + (i + 1) * 725)))
-            if (element.units.size == 0) {
-                break;
+    private fun onBytesChanged() {
+        this::class.memberProperties
+            .filter { it.hasAnnotation<ClashProperty>() }
+            .map { it as KMutableProperty<*> }
+            .forEach {
+                val annotation = getAnnotation<ClashProperty>(it)
+                val propertyBytes = bytes.slice(annotation.index until annotation.index + annotation.length)
+                val propertyValue = getConverter(annotation).fromBytes(propertyBytes)
+                it.setter.call(this, propertyValue)
             }
-            armies.add(i, element)
-        }
+
+        this::class.memberProperties
+            .filter { it.hasAnnotation<ClashAggregateProperty>() }
+            .map { it as KMutableProperty<*> }
+            .forEach {
+                val annotation = getAnnotation<ClashAggregateProperty>(it)
+                val list = mutableListOf<ClashObject>()
+                for (i in 0 until annotation.count) {
+                    list.add(
+                        annotation.clas.createInstance().withBytes(
+                            bytes.slice(
+                                annotation.index + i * annotation.size until annotation.index + (i + 1) * annotation.size
+                            )
+                        )
+                    )
+                }
+                it.setter.call(this, list)
+            }
+    }
+
+    private inline fun <reified T : Annotation> getAnnotation(it: KProperty<*>) = it.findAnnotation<T>()!!
+
+    private fun getConverter(annotation: ClashProperty?) = annotation?.converter?.objectInstance!!
+
+    fun <T> withBytes(slice: List<Byte>): T {
+        bytes = slice
+        return this as T
     }
 }
 
-class Tile(_bytes: List<Byte>) {
-    @Column(1)
-    var subtype: Byte
+class Unit() : ClashObject() {
+    @ClashProperty(12, 1, ByteConverter::class)
+    var exp: Byte by clashProperty(0)
 
-    @Column(4)
-    var bytes: List<Byte> = _bytes
+    @ClashProperty(11, 1, ByteConverter::class)
+    var morale: Byte by clashProperty(0)
 
-    @Column(0)
-    var type: Byte
+    @ClashProperty(10, 1, ByteConverter::class)
+    var shout: Byte by clashProperty(0)
 
-    @Column(2)
-    var unknown: Byte
+    @ClashProperty(9, 1, ByteConverter::class)
+    var health: Byte by clashProperty(0)
 
-    @Column(3)
-    var anim: Byte
+    @ClashProperty(8, 1, ByteConverter::class)
+    var move: Byte by clashProperty(0)
 
-    init {
-        type = bytes[0]
-        subtype = bytes[2]
-        unknown = bytes[4]
-        anim = bytes[6]
-    }
+    @ClashProperty(0, 1, ByteConverter::class)
+    var type: Byte by clashProperty(0)
+
+}
+
+class Player : ClashObject() {
+
+    @ClashProperty(0, 10, StringConverter::class)
+    var name: String by clashProperty("")
+}
+
+class Army : ClashObject() {
+    @ClashProperty(0, 1, ByteConverter::class)
+    var x: Byte by clashProperty(0)
+
+    @ClashProperty(2, 1, ByteConverter::class)
+    var y: Byte by clashProperty(0)
+
+    @ClashProperty(4, 1, ByteConverter::class)
+    var player: Byte by clashProperty(0)
+
+    @ClashProperty(5, 1, ByteConverter::class)
+    var dir: Byte by clashProperty(0)
+
+    @ClashAggregateProperty(6, 10, 31, Unit::class)
+    var units: List<Unit> by clashProperty(emptyList())
+}
+
+
+class Save() : ClashObject() {
+    @ClashProperty(0, 16, StringConverter::class)
+    var name: String by clashProperty("")
+
+    @ClashAggregateProperty(16, 10000, 14, Tile::class)
+    var tiles: List<Tile> by clashProperty(emptyList())
+
+    @ClashAggregateProperty(147190, 500, 725, Army::class)
+    var armies: List<Army> by clashProperty(emptyList())
+
+    @ClashAggregateProperty(140044, 5, 1423, Player::class)
+    var players: List<Player> by clashProperty(emptyList())
+
+    @ClashAggregateProperty(509690, 10, 467, Castle::class)
+    var castles: List<Castle> by clashProperty(emptyList())
+}
+
+class Castle() : ClashObject() {
+    @ClashProperty(2, 1, ByteConverter::class)
+    var player: Byte by clashProperty(0)
+
+    @ClashProperty(4, 1, ByteConverter::class)
+    var type: Byte by clashProperty(0)
+
+    @ClashProperty(3, 1, ByteConverter::class)
+    var appearance: Byte by clashProperty(0)
+
+    @ClashProperty(5, 10, StringConverter::class)
+    var name: String by clashProperty("")
+
+    @ClashAggregateProperty(18, 12, 31, Unit::class)
+    var units: List<Unit> by clashProperty(emptyList())
+}
+
+class Tile() : ClashObject() {
+    @ClashProperty(2, 1, ByteConverter::class)
+    var subtype: Byte by clashProperty(0)
+
+    @ClashProperty(0, 1, ByteConverter::class)
+    var type: Byte by clashProperty(0)
+
+    @ClashProperty(4, 1, ByteConverter::class)
+    var unknown: Byte by clashProperty(0)
+
+    @ClashProperty(6, 1, ByteConverter::class)
+    var anim: Byte by clashProperty(0)
+
 }
 
 private fun parseFile(readBytes: ByteArray): Save {
-    return Save(readBytes.toList())
+    return Save().withBytes(readBytes.toList())
 }
 
 class ClashSaveEditor(title: String) : JFrame() {
@@ -178,11 +228,26 @@ class ClashSaveEditor(title: String) : JFrame() {
                 initializeMap(save, clashGUI)
 
                 initializeTiles(save, clashGUI)
+
+                initializePlayers(save, clashGUI)
+
+                initializeCastles(save, clashGUI)
             }
         }
 
 
         createLayout(clashGUI.mainPanel)
+    }
+
+    private fun initializeCastles(save: Save, clashGUI: ClashGUI) {
+        val dataModel: TableModel = buildTable(save.castles)
+
+        clashGUI.castlesTable.model = dataModel
+
+        clashGUI.castlesTable.selectionModel.addListSelectionListener {
+            clashGUI.castleUnitTable.model = buildTable(save.castles[clashGUI.castlesTable.selectedRow].units)
+        }
+
     }
 
     private fun initializeMap(save: Save, clashGUI: ClashGUI) {
@@ -204,12 +269,14 @@ class ClashSaveEditor(title: String) : JFrame() {
 
         clashGUI.tilesTable.model = dataModel
     }
+
+    private fun initializePlayers(save: Save, clashGUI: ClashGUI) {
+        val dataModel: TableModel = buildTable(save.players)
+
+        clashGUI.playersTable.model = dataModel
+    }
 }
 
-
-fun isFieldAccessible(property: KProperty1<*, *>): Boolean {
-    return property.javaGetter?.modifiers?.let { !Modifier.isPrivate(it) } ?: false
-}
 
 private fun createAndShowGUI() {
     val frame = ClashSaveEditor("Clash Save Editor")

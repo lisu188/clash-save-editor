@@ -10,6 +10,9 @@ public class ClashGUI {
     private JTable unitTable;
     private MapPanel mapPanel;
     private JTable tilesTable;
+    private JTable playersTable;
+    private JTable castlesTable;
+    private JTable castleUnitTable;
 
     public JPanel getMainPanel() {
         return mainPanel;
@@ -33,5 +36,17 @@ public class ClashGUI {
 
     public JTable getTilesTable() {
         return tilesTable;
+    }
+
+    public JTable getPlayersTable() {
+        return playersTable;
+    }
+
+    public JTable getCastlesTable() {
+        return castlesTable;
+    }
+
+    public JTable getCastleUnitTable() {
+        return castleUnitTable;
     }
 }

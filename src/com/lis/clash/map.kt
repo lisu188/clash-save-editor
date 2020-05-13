@@ -3,10 +3,9 @@ package com.lis.clash
 import java.awt.Color
 import java.awt.Graphics
 import javax.swing.JPanel
-import kotlin.math.roundToInt
 
 class MapPanel() : JPanel() {
-    var tiles: MutableList<Tile> = mutableListOf()
+    var tiles: List<Tile> = listOf()
 
     override fun paintComponent(g: Graphics) {
         tiles.forEachIndexed { index, tile ->
