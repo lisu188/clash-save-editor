@@ -9,35 +9,38 @@ import javax.swing.JFrame
 import javax.swing.table.TableModel
 import kotlin.properties.Delegates
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
-import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.memberProperties
 
 
-open class ClashObject() {
+open class ClashObject(val parent: ClashObject?, val index: Int) {
 
-    private var bytes: List<Byte> by Delegates.observable(listOf(), { _, oldValue, newValue ->
+    internal var bytes: List<Byte> by Delegates.observable(listOf(), { _, oldValue, newValue ->
         if (oldValue != newValue) {
             onBytesChanged()
         }
     })
 
 
-    public fun <T> clashProperty(
+    fun <T> clashProperty(
         initialValue: T
     ): ReadWriteProperty<Any?, T> {
         return Delegates.observable(initialValue, { property, oldValue, newValue ->
             if (oldValue != newValue && property.hasAnnotation<ClashProperty>()) {
                 val annotation = getAnnotation<ClashProperty>(property)
                 val toBytes = getConverter(annotation).toBytes(newValue!!)
-                val start = bytes.subList(0, annotation.index)
-                val mid =
+                val augumentedBytes =
                     if (toBytes.size < annotation.length) toBytes + List(annotation.length - toBytes.size) { -1 } else toBytes
-                val end = bytes.subList(annotation.index + annotation.length, bytes.size)
-                bytes = start + mid + end
+                refreshBytes(annotation.index, augumentedBytes)
+            }
+            if (oldValue != newValue && property.hasAnnotation<ClashAggregateProperty>()) {
+                for (ob in newValue as List<ClashObject>) {
+                    refreshBytes(ob.index, ob.bytes)
+                }
             }
         })
     }
@@ -48,7 +51,9 @@ open class ClashObject() {
             .map { it as KMutableProperty<*> }
             .forEach {
                 val annotation = getAnnotation<ClashProperty>(it)
-                val propertyBytes = bytes.slice(annotation.index until annotation.index + annotation.length)
+                val startIndex = annotation.index
+                val endIndex = annotation.index + annotation.length
+                val propertyBytes = bytes.slice(startIndex until endIndex)
                 val propertyValue = getConverter(annotation).fromBytes(propertyBytes)
                 it.setter.call(this, propertyValue)
             }
@@ -60,16 +65,33 @@ open class ClashObject() {
                 val annotation = getAnnotation<ClashAggregateProperty>(it)
                 val list = mutableListOf<ClashObject>()
                 for (i in 0 until annotation.count) {
+                    val startIndex = annotation.index + i * annotation.size
+                    val endIndex = annotation.index + (i + 1) * annotation.size
                     list.add(
-                        annotation.clas.createInstance().withBytes(
+                        getConstructor(annotation).call(this, startIndex).withBytes(
                             bytes.slice(
-                                annotation.index + i * annotation.size until annotation.index + (i + 1) * annotation.size
+                                startIndex until endIndex
                             )
                         )
                     )
                 }
                 it.setter.call(this, list)
             }
+
+        parent?.refreshBytes(index, bytes)
+    }
+
+    private fun refreshBytes(index: Int, _bytes: List<Byte>) {
+        if (bytes.slice(index until index + _bytes.size) != _bytes) {
+            val start = bytes.subList(0, index)
+            val mid = _bytes
+            val end = bytes.subList(index + _bytes.size, bytes.size)
+            bytes = start + mid + end
+        }
+    }
+
+    private fun getConstructor(annotation: ClashAggregateProperty): KFunction<ClashObject> {
+        return annotation.clas.constructors.first { it.parameters.size == 2 }
     }
 
     private inline fun <reified T : Annotation> getAnnotation(it: KProperty<*>) = it.findAnnotation<T>()!!
@@ -82,7 +104,7 @@ open class ClashObject() {
     }
 }
 
-class Unit() : ClashObject() {
+class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashProperty(12, 1, ByteConverter::class)
     var exp: Byte by clashProperty(0)
 
@@ -103,13 +125,13 @@ class Unit() : ClashObject() {
 
 }
 
-class Player : ClashObject() {
+class Player(parent: ClashObject, index: Int) : ClashObject(parent, index) {
 
     @ClashProperty(0, 10, StringConverter::class)
     var name: String by clashProperty("")
 }
 
-class Army : ClashObject() {
+class Army(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashProperty(0, 1, ByteConverter::class)
     var x: Byte by clashProperty(0)
 
@@ -127,7 +149,7 @@ class Army : ClashObject() {
 }
 
 
-class Save() : ClashObject() {
+class Save : ClashObject(null, 0) {
     @ClashProperty(0, 16, StringConverter::class)
     var name: String by clashProperty("")
 
@@ -144,7 +166,7 @@ class Save() : ClashObject() {
     var castles: List<Castle> by clashProperty(emptyList())
 }
 
-class Castle() : ClashObject() {
+class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashProperty(2, 1, ByteConverter::class)
     var player: Byte by clashProperty(0)
 
@@ -161,7 +183,7 @@ class Castle() : ClashObject() {
     var units: List<Unit> by clashProperty(emptyList())
 }
 
-class Tile() : ClashObject() {
+class Tile(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashProperty(2, 1, ByteConverter::class)
     var subtype: Byte by clashProperty(0)
 
@@ -181,6 +203,8 @@ private fun parseFile(readBytes: ByteArray): Save {
 }
 
 class ClashSaveEditor(title: String) : JFrame() {
+
+    private lateinit var save: Save
 
     init {
         createUI(title)
@@ -213,64 +237,76 @@ class ClashSaveEditor(title: String) : JFrame() {
         setLocationRelativeTo(null)
 
         val clashGUI = ClashGUI()
-        val openButton = clashGUI.getLoadButton();
-        openButton.addActionListener {
-            //Create a file chooser
-            val fc = JFileChooser();
-            fc.currentDirectory = File("./save");
-            val returnVal = fc.showOpenDialog(this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                val file = fc.selectedFile
-                val save = parseFile(file.readBytes());
 
-                initializeUnits(save, clashGUI)
+        clashGUI.loadButton.addActionListener {
 
-                initializeMap(save, clashGUI)
+            withFile("E:/Gry/Clash/save") {
+                save = parseFile(it.readBytes());
 
-                initializeTiles(save, clashGUI)
+                initializeUnits(clashGUI)
 
-                initializePlayers(save, clashGUI)
+                initializeMap(clashGUI)
 
-                initializeCastles(save, clashGUI)
+                initializeTiles(clashGUI)
+
+                initializePlayers(clashGUI)
+
+                initializeCastles(clashGUI)
             }
         }
 
+        clashGUI.saveButton.addActionListener {
+            withFile("E:/Gry/Clash/save") {
+                it.writeBytes(save.bytes.toByteArray())
+            }
+        }
 
         createLayout(clashGUI.mainPanel)
     }
 
-    private fun initializeCastles(save: Save, clashGUI: ClashGUI) {
+    private fun withFile(pathName: String, function: (file: File) -> kotlin.Unit) {
+        val fc = JFileChooser();
+        fc.currentDirectory = File(pathName);
+        val returnVal = fc.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            function.invoke(fc.selectedFile)
+        }
+    }
+
+    private fun initializeCastles(clashGUI: ClashGUI) {
         val dataModel: TableModel = buildTable(save.castles)
 
         clashGUI.castlesTable.model = dataModel
 
         clashGUI.castlesTable.selectionModel.addListSelectionListener {
-            clashGUI.castleUnitTable.model = buildTable(save.castles[clashGUI.castlesTable.selectedRow].units)
+            clashGUI.castleUnitTable.model =
+                buildTable(if (clashGUI.castlesTable.selectedRow != -1) save.castles[clashGUI.castlesTable.selectedRow].units else emptyList())
         }
 
     }
 
-    private fun initializeMap(save: Save, clashGUI: ClashGUI) {
+    private fun initializeMap(clashGUI: ClashGUI) {
         clashGUI.mapPanel.tiles = save.tiles
     }
 
-    private fun initializeUnits(save: Save, clashGUI: ClashGUI) {
+    private fun initializeUnits(clashGUI: ClashGUI) {
         val dataModel: TableModel = buildTable(save.armies)
 
         clashGUI.armyTable.model = dataModel
 
         clashGUI.armyTable.selectionModel.addListSelectionListener {
-            clashGUI.unitTable.model = buildTable(save.armies[clashGUI.armyTable.selectedRow].units)
+            clashGUI.unitTable.model =
+                buildTable(if (clashGUI.armyTable.selectedRow != -1) save.armies[clashGUI.armyTable.selectedRow].units else emptyList())
         }
     }
 
-    private fun initializeTiles(save: Save, clashGUI: ClashGUI) {
+    private fun initializeTiles(clashGUI: ClashGUI) {
         val dataModel: TableModel = buildTable(save.tiles)
 
         clashGUI.tilesTable.model = dataModel
     }
 
-    private fun initializePlayers(save: Save, clashGUI: ClashGUI) {
+    private fun initializePlayers(clashGUI: ClashGUI) {
         val dataModel: TableModel = buildTable(save.players)
 
         clashGUI.playersTable.model = dataModel
