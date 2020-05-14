@@ -13,6 +13,7 @@ public class ClashGUI {
     private JTable playersTable;
     private JTable castlesTable;
     private JTable castleUnitTable;
+    private JButton saveButton;
 
     public JPanel getMainPanel() {
         return mainPanel;
@@ -48,5 +49,9 @@ public class ClashGUI {
 
     public JTable getCastleUnitTable() {
         return castleUnitTable;
+    }
+
+    public JButton getSaveButton() {
+        return saveButton;
     }
 }
