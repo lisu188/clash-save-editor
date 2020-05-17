@@ -5,15 +5,16 @@ import javax.swing.*;
 public class ClashGUI {
     private JPanel mainPanel;
     private JButton loadButton;
-    private JTable armyTable;
+    private ClashTable armyUnitsTable;
     private JTabbedPane tabbedPane1;
-    private JTable unitTable;
+    private ClashTable unitTable;
     private MapPanel mapPanel;
-    private JTable tilesTable;
-    private JTable playersTable;
-    private JTable castlesTable;
-    private JTable castleUnitTable;
+    private ClashTable tilesTable;
+    private ClashTable playersTable;
+    private ClashTable castlesTable;
+    private ClashTable castleUnitTable;
     private JButton saveButton;
+    private BytesTable bytesTable;
 
     public JPanel getMainPanel() {
         return mainPanel;
@@ -23,11 +24,11 @@ public class ClashGUI {
         return loadButton;
     }
 
-    public JTable getArmyTable() {
-        return armyTable;
+    public ClashTable getArmyUnitsTable() {
+        return armyUnitsTable;
     }
 
-    public JTable getUnitTable() {
+    public ClashTable getUnitTable() {
         return unitTable;
     }
 
@@ -35,23 +36,27 @@ public class ClashGUI {
         return mapPanel;
     }
 
-    public JTable getTilesTable() {
+    public ClashTable getTilesTable() {
         return tilesTable;
     }
 
-    public JTable getPlayersTable() {
+    public ClashTable getPlayersTable() {
         return playersTable;
     }
 
-    public JTable getCastlesTable() {
+    public ClashTable getCastlesTable() {
         return castlesTable;
     }
 
-    public JTable getCastleUnitTable() {
+    public ClashTable getCastleUnitTable() {
         return castleUnitTable;
     }
 
     public JButton getSaveButton() {
         return saveButton;
+    }
+
+    public BytesTable getBytesTable() {
+        return bytesTable;
     }
 }
