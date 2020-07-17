@@ -1,7 +1,7 @@
 package com.lis.clash.objects
 
 import com.lis.clash.ClashAggregateProperty
-import com.lis.clash.ClashProperty
+import com.lis.clash.ClashSimpleProperty
 import kotlin.properties.Delegates
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KFunction
@@ -30,8 +30,8 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
         initialValue: T
     ): ReadWriteProperty<Any?, T> {
         return Delegates.observable(initialValue, { property, oldValue, newValue ->
-            if (oldValue != newValue && property.hasAnnotation<ClashProperty>()) {
-                val annotation = getAnnotation<ClashProperty>(property)
+            if (oldValue != newValue && property.hasAnnotation<ClashSimpleProperty>()) {
+                val annotation = getAnnotation<ClashSimpleProperty>(property)
                 val toBytes = getConverter(annotation).toBytes(newValue!!)
                 val augumentedBytes =
                     if (toBytes.size < annotation.length) toBytes + List(annotation.length - toBytes.size) { -1 } else toBytes
@@ -47,10 +47,10 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
 
     private fun onBytesChanged() {
         this::class.memberProperties
-            .filter { it.hasAnnotation<ClashProperty>() }
+            .filter { it.hasAnnotation<ClashSimpleProperty>() }
             .map { it as KMutableProperty<*> }
             .forEach {
-                val annotation = getAnnotation<ClashProperty>(it)
+                val annotation = getAnnotation<ClashSimpleProperty>(it)
                 val startIndex = annotation.index
                 val endIndex = annotation.index + annotation.length
                 val propertyBytes = bytes.slice(startIndex until endIndex)
@@ -97,7 +97,7 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
 
     private inline fun <reified T : Annotation> getAnnotation(it: KProperty<*>) = it.findAnnotation<T>()!!
 
-    private fun getConverter(annotation: ClashProperty?) = annotation?.converter?.objectInstance!!
+    private fun getConverter(annotation: ClashSimpleProperty?) = annotation?.converter?.objectInstance!!
 
     fun <T> withBytes(slice: List<Byte>): T {
         bytes = slice

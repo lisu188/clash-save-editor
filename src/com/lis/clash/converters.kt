@@ -8,25 +8,6 @@ interface Converter {
     fun fromBytes(s: List<Byte>): Any
 }
 
-object NoneConverter : Converter {
-    override fun toString(t: Any): String {
-        throw IllegalArgumentException("No converter!")
-    }
-
-    override fun fromString(s: String): Any {
-        throw IllegalArgumentException("No converter!")
-    }
-
-    override fun toBytes(t: Any): List<Byte> {
-        throw IllegalArgumentException("No converter!")
-    }
-
-    override fun fromBytes(s: List<Byte>): Any {
-        throw IllegalArgumentException("No converter!")
-    }
-
-}
-
 object ByteConverter : Converter {
     override fun toString(t: Any): String {
         return t.toString();
