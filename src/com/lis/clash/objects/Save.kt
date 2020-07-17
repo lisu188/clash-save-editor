@@ -1,11 +1,11 @@
 package com.lis.clash.objects
 
 import com.lis.clash.ClashAggregateProperty
-import com.lis.clash.ClashProperty
+import com.lis.clash.ClashSimpleProperty
 import com.lis.clash.StringConverter
 
 class Save : ClashObject(null, 0) {
-    @ClashProperty(0, 16, StringConverter::class)
+    @ClashSimpleProperty(0, 16, StringConverter::class)
     var name: String by clashProperty("")
 
     @ClashAggregateProperty(16, 10000, 14, Tile::class)
