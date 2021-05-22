@@ -1,18 +1,19 @@
 package com.lis.clash.objects
 
-import com.lis.clash.*
+import com.lis.clash.ClashAggregateProperty
+import com.lis.clash.ClashSimpleProperty
 
 class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
-    @ClashSimpleProperty(2, 1, ByteConverter::class)
+    @ClashSimpleProperty(2, 1)
     var player: Byte by clashProperty(0)
 
-    @ClashSimpleProperty(4, 1, ByteConverter::class)
+    @ClashSimpleProperty(4, 1)
     var type: Byte by clashProperty(0)
 
-    @ClashSimpleProperty(3, 1, ByteConverter::class)
+    @ClashSimpleProperty(3, 1)
     var appearance: Byte by clashProperty(0)
 
-    @ClashSimpleProperty(5, 10, StringConverter::class)
+    @ClashSimpleProperty(5, 10)
     var name: String by clashProperty("")
 
     @ClashAggregateProperty(18, 12, 31, Unit::class)

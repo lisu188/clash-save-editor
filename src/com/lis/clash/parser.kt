@@ -2,13 +2,15 @@ package com.lis.clash
 
 import com.lis.clash.objects.ClashObject
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.jvmErasure
 
 
-annotation class ClashSimpleProperty(val index: Int, val length: Int, val converter: KClass<out Converter>)
+annotation class ClashSimpleProperty(val index: Int, val length: Int)
 
 annotation class ClashAggregateProperty(
     val index: Int,
@@ -33,8 +35,16 @@ abstract class ClashPropertyDescriptor(val _property: KMutableProperty<ClashObje
         return _property.getter.call(_object)
     }
 
-    fun set(_object: ClashObject, value: String) {
+    fun setString(_object: ClashObject, value: String) {
         _property.setter.call(_object, getConverter().fromString(value))
+    }
+
+    fun setBytes(_object: ClashObject, value: List<Byte>) {
+        _property.setter.call(_object, getConverter().fromBytes(value))
+    }
+
+    fun set(_object: ClashObject, value: Any) {
+        _property.setter.call(_object, value)
     }
 
     abstract fun getConverter(): Converter
@@ -59,7 +69,7 @@ class SimplePropertyDescriptor(_property: KMutableProperty<ClashObject>) : Clash
     }
 
     override fun getConverter(): Converter {
-        return annotation.converter.objectInstance!!
+        return converters[_property.getter.returnType.jvmErasure]!!
     }
 }
 
@@ -80,12 +90,29 @@ class AggregatePropertyDescriptor(_property: KMutableProperty<ClashObject>) : Cl
     override fun getConverter(): Converter {
         TODO("Not yet implemented")
     }
+
+    fun count(): Int {
+        return annotation.count
+    }
+
+    fun size(): Int {
+        return annotation.size
+    }
+
+    fun getConstructor(): KFunction<ClashObject> {
+        return annotation.clas.constructors.first { it.parameters.size == 2 }
+    }
+
 }
 
 class ClassDescriptor(val properties: List<ClashPropertyDescriptor>) {
 
-    fun getSimpleProperties(): List<ClashPropertyDescriptor> {
-        return properties.filter { it.isSimple() }
+    fun getSimpleProperties(): List<SimplePropertyDescriptor> {
+        return properties.filter { it.isSimple() }.map { it as SimplePropertyDescriptor }
+    }
+
+    fun getAggregateProperties(): List<AggregatePropertyDescriptor> {
+        return properties.filter { it.isAggregate() }.map { it as AggregatePropertyDescriptor }
     }
 
     fun getPropertyWithIndex(index: Int): ClashPropertyDescriptor {
@@ -100,6 +127,15 @@ class ClassDescriptor(val properties: List<ClashPropertyDescriptor>) {
 
     fun getSimpleProperty(col: Int): ClashPropertyDescriptor {
         return getOrderedSimpleProperties()[col]
+    }
+
+    fun getSimpleProperty(name: String): SimplePropertyDescriptor? {
+        return getSimpleProperties().find { it.getName() == name }
+    }
+
+
+    fun getAggregateProperty(name: String): AggregatePropertyDescriptor? {
+        return getAggregateProperties().find { it.getName() == name }
     }
 }
 

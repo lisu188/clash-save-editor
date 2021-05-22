@@ -1,15 +1,8 @@
 package com.lis.clash.objects
 
-import com.lis.clash.ClashAggregateProperty
-import com.lis.clash.ClashSimpleProperty
+import com.lis.clash.getClassDescriptor
 import kotlin.properties.Delegates
 import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KFunction
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KProperty
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.memberProperties
 
 open class ClashObject(val parent: ClashObject?, val index: Int) {
 
@@ -30,54 +23,47 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
         initialValue: T
     ): ReadWriteProperty<Any?, T> {
         return Delegates.observable(initialValue, { property, oldValue, newValue ->
-            if (oldValue != newValue && property.hasAnnotation<ClashSimpleProperty>()) {
-                val annotation = getAnnotation<ClashSimpleProperty>(property)
-                val toBytes = getConverter(annotation).toBytes(newValue!!)
-                val augumentedBytes =
-                    if (toBytes.size < annotation.length) toBytes + List(annotation.length - toBytes.size) { -1 } else toBytes
-                refreshBytes(annotation.index, augumentedBytes)
-            }
-            if (oldValue != newValue && property.hasAnnotation<ClashAggregateProperty>()) {
-                for (ob in newValue as List<ClashObject>) {
-                    refreshBytes(ob.index, ob.bytes)
+            if (oldValue != newValue) {
+                getClassDescriptor(this::class).getSimpleProperty(property.name)?.let {
+                    val toBytes = it.getConverter().toBytes(newValue!!)
+                    val augumentedBytes =
+                        if (toBytes.size < it.length()) toBytes + List(it.length() - toBytes.size) { -1 } else toBytes
+                    refreshBytes(it.index(), augumentedBytes)
+                }
+
+                getClassDescriptor(this::class).getAggregateProperty(property.name)?.let {
+                    for (ob in newValue as List<ClashObject>) {
+                        refreshBytes(ob.index, ob.bytes)
+                    }
                 }
             }
         })
     }
 
     private fun onBytesChanged() {
-        this::class.memberProperties
-            .filter { it.hasAnnotation<ClashSimpleProperty>() }
-            .map { it as KMutableProperty<*> }
-            .forEach {
-                val annotation = getAnnotation<ClashSimpleProperty>(it)
-                val startIndex = annotation.index
-                val endIndex = annotation.index + annotation.length
-                val propertyBytes = bytes.slice(startIndex until endIndex)
-                val propertyValue = getConverter(annotation).fromBytes(propertyBytes)
-                it.setter.call(this, propertyValue)
-            }
+        getClassDescriptor(this::class).getSimpleProperties().forEach {
+            val startIndex = it.index()
+            val endIndex = it.index() + it.length()
+            val propertyBytes = bytes.slice(startIndex until endIndex)
+            it.setBytes(this, propertyBytes)
+        }
 
-        this::class.memberProperties
-            .filter { it.hasAnnotation<ClashAggregateProperty>() }
-            .map { it as KMutableProperty<*> }
-            .forEach {
-                val annotation = getAnnotation<ClashAggregateProperty>(it)
-                val list = mutableListOf<ClashObject>()
-                for (i in 0 until annotation.count) {
-                    val startIndex = annotation.index + i * annotation.size
-                    val endIndex = annotation.index + (i + 1) * annotation.size
-                    val element = getConstructor(annotation).call(this, startIndex)
-                        .withBytes<ClashObject>(
-                            bytes.slice(startIndex until endIndex)
-                        )
-                    if (!element.isValid()) {
-                        break;
-                    }
-                    list.add(element)
+        getClassDescriptor(this::class).getAggregateProperties().forEach {
+            val list = mutableListOf<ClashObject>()
+            for (i in 0 until it.count()) {
+                val startIndex = it.index() + i * it.size()
+                val endIndex = it.index() + (i + 1) * it.size()
+                val element = it.getConstructor().call(this, startIndex)
+                    .withBytes<ClashObject>(
+                        bytes.slice(startIndex until endIndex)
+                    )
+                if (!element.isValid()) {
+                    break;
                 }
-                it.setter.call(this, list)
+                list.add(element)
             }
+            it.set(this, list)
+        }
 
         parent?.refreshBytes(index, bytes)
     }
@@ -90,14 +76,6 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
             bytes = start + mid + end
         }
     }
-
-    private fun getConstructor(annotation: ClashAggregateProperty): KFunction<ClashObject> {
-        return annotation.clas.constructors.first { it.parameters.size == 2 }
-    }
-
-    private inline fun <reified T : Annotation> getAnnotation(it: KProperty<*>) = it.findAnnotation<T>()!!
-
-    private fun getConverter(annotation: ClashSimpleProperty?) = annotation?.converter?.objectInstance!!
 
     fun <T> withBytes(slice: List<Byte>): T {
         bytes = slice

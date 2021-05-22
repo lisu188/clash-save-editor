@@ -5,7 +5,7 @@ import com.lis.clash.ClashSimpleProperty
 import com.lis.clash.StringConverter
 
 class Save : ClashObject(null, 0) {
-    @ClashSimpleProperty(0, 16, StringConverter::class)
+    @ClashSimpleProperty(0, 16)
     var name: String by clashProperty("")
 
     @ClashAggregateProperty(16, 10000, 14, Tile::class)

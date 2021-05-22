@@ -15,6 +15,11 @@ public class ClashGUI {
     private ClashTable castleUnitTable;
     private JButton saveButton;
     private BytesTable bytesTable;
+    private JTextField xTile;
+    private JTextField yTile;
+    private JPanel scriptsTab;
+    private JButton executeButton;
+    private JComboBox scriptBox;
 
     public JPanel getMainPanel() {
         return mainPanel;
@@ -58,5 +63,21 @@ public class ClashGUI {
 
     public BytesTable getBytesTable() {
         return bytesTable;
+    }
+
+    public JTextField getxTile() {
+        return xTile;
+    }
+
+    public JTextField getyTile() {
+        return yTile;
+    }
+
+    public JButton getExecuteButton() {
+        return executeButton;
+    }
+
+    public JComboBox getScriptBox() {
+        return scriptBox;
     }
 }

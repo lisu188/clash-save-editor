@@ -18,7 +18,6 @@ class DynamicTableModel(val _data: () -> List<ClashObject>, val dataClass: KClas
         return getClassDescriptor(dataClass).getSimplePropertiesCount()
     }
 
-
     override fun getRowCount(): Int {
         return _data().size
     }
@@ -32,13 +31,13 @@ class DynamicTableModel(val _data: () -> List<ClashObject>, val dataClass: KClas
     }
 
     override fun setValueAt(aValue: Any, row: Int, col: Int) {
-        return getClassDescriptor(dataClass).getSimpleProperty(col).set(_data()[row], aValue as String)
+        return getClassDescriptor(dataClass).getSimpleProperty(col).setString(_data()[row], aValue as String)
     }
 }
 
 class SelectionController {
     var currentSelectedTable: ClashTable? = null
-    var currentSelectedIndex: Int = -1;
+    var currentSelectedIndex: Int = -1
     var bytesTable: BytesTable? = null
 
     fun onSelection(table: ClashTable, selectedIndex: Int) {
@@ -46,11 +45,11 @@ class SelectionController {
             && table != currentSelectedTable?.subTable
             && table != currentSelectedTable?.masterTable
         ) {
-            currentSelectedTable?.clearSelection();
-            currentSelectedTable?.masterTable?.clearSelection();
+            currentSelectedTable?.clearSelection()
+            currentSelectedTable?.masterTable?.clearSelection()
         }
-        currentSelectedTable = table;
-        currentSelectedIndex = selectedIndex;
+        currentSelectedTable = table
+        currentSelectedIndex = selectedIndex
 
         bytesTable?.model = BytesTableModel(this)
     }
@@ -62,9 +61,9 @@ class SelectionController {
 }
 
 class ClashTable : JTable() {
-    var subTable: ClashTable? = null;
-    var masterTable: ClashTable? = null;
-    var _data: () -> List<ClashObject> = { emptyList() };
+    var subTable: ClashTable? = null
+    var masterTable: ClashTable? = null
+    var _data: () -> List<ClashObject> = { emptyList() }
 
     init {
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
@@ -72,7 +71,7 @@ class ClashTable : JTable() {
 
     //TODO: extract to builder
     inline fun <reified T : ClashObject> withData(noinline function: () -> List<T>): ClashTable {
-        _data = function;
+        _data = function
         model = DynamicTableModel(function, T::class)
         return this
     }
@@ -83,8 +82,8 @@ class ClashTable : JTable() {
         noinline slaveDataExtractor: (U) -> List<T>
     ): ClashTable {
         slaveTable.masterTable = this
-        subTable = slaveTable;
-        selectionModel.addListSelectionListener {
+        subTable = slaveTable
+        `access$selectionModel`?.addListSelectionListener {
             subTable?.withData {
                 if (selectedRow != -1) slaveDataExtractor(_data()[selectedRow] as U) else emptyList()
             }
@@ -100,27 +99,47 @@ class ClashTable : JTable() {
         return this
     }
 
+    fun withSelectionListener(listener: (row: Int) -> Unit): ClashTable {
+        selectionModel.addListSelectionListener {
+            listener.invoke(selectedRow)
+        }
+        return this
+    }
+
+    @PublishedApi
+    internal var `access$selectionModel`: ListSelectionModel?
+        get() = selectionModel
+        set(value) {
+            selectionModel = value
+        }
+
 }
 
 class BytesTableModel(val selectionController: SelectionController) : AbstractTableModel() {
+    val WIDTH = 6
 
     override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean {
-        return true
+        return getByteIndex(rowIndex, columnIndex) < getCurrentObject()?.bytes!!.size
     }
 
     override fun getRowCount(): Int {
-        return if (getCurrentSelected() == -1) 0 else 1;
+        return if (getCurrentSelected() == -1) 0 else (getCurrentObject()?.bytes?.size?.div(WIDTH)?.plus(1) ?: 0)
     }
 
     override fun getColumnCount(): Int {
         if (getCurrentSelected() != -1) {
-            return getCurrentObject()?.bytes?.size ?: 0
+            return WIDTH
         }
         return 0
     }
 
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Byte? {
-        return getCurrentObject()?.bytes?.get(columnIndex)
+        val index = getByteIndex(rowIndex, columnIndex)
+        val bytes = getCurrentObject()?.bytes!!
+        if (index < bytes.size) {
+            return bytes[index]
+        }
+        return null
     }
 
     private fun getCurrentSelected() = selectionController.currentSelectedIndex
@@ -128,14 +147,19 @@ class BytesTableModel(val selectionController: SelectionController) : AbstractTa
     private fun getCurrentData() = selectionController.currentSelectedTable?._data
 
     override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) {
-        getCurrentObject()?.changeByte(columnIndex, (aValue as String).toByte())
+        getCurrentObject()?.changeByte(getByteIndex(rowIndex, columnIndex), (aValue as String).toByte())
     }
 
     private fun getCurrentObject() =
         getCurrentData()?.let { it() }?.getOrElse(getCurrentSelected()) { null }
 
+    private fun getByteIndex(row: Int, column: Int): Int {
+        return row * WIDTH + column
+    }
+
+    private fun getRowColumnIndex(index: Int): Pair<Int, Int> {
+        return index / WIDTH to index % WIDTH
+    }
 }
 
-class BytesTable : JTable() {
-
-}
+class BytesTable : JTable()
