@@ -9,6 +9,9 @@ import javax.swing.GroupLayout
 import javax.swing.JComponent
 import javax.swing.JFileChooser
 import javax.swing.JFrame
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.hasAnnotation
 
 
 private fun parseFile(readBytes: ByteArray): Save {
@@ -57,7 +60,6 @@ class ClashSaveEditor(title: String) : JFrame() {
         selectionController = SelectionController().withBytesTable(clashGUI.bytesTable);
 
         clashGUI.loadButton.addActionListener {
-
             withFile("E:/Gry/Clash/save") {
                 save = parseFile(it.readBytes());
 
@@ -70,6 +72,8 @@ class ClashSaveEditor(title: String) : JFrame() {
                 initializeCastles()
 
                 initializeMap()
+
+                initializeScripts()
             }
         }
 
@@ -81,6 +85,19 @@ class ClashSaveEditor(title: String) : JFrame() {
 
         createLayout(clashGUI.mainPanel)
     }
+
+    private fun initializeScripts() {
+        Scripts::class.functions
+            .filter { it.hasAnnotation<ClashScript>() }
+            .forEach {
+                clashGUI.scriptBox.addItem(it)
+            }
+
+        clashGUI.executeButton.addActionListener {
+            print((clashGUI.scriptBox.selectedItem as KFunction<*>).call(Scripts::class.objectInstance, save))
+        }
+    }
+
 
     private fun withFile(pathName: String, function: (file: File) -> Unit) {
         val fc = JFileChooser();
@@ -113,6 +130,23 @@ class ClashSaveEditor(title: String) : JFrame() {
     private fun initializeTiles() {
         clashGUI.tilesTable.withData { save.tiles }
             .withSelectionController(selectionController)
+            .withSelectionListener {
+                clashGUI.getxTile().text = fromIndex(it).first.toString()
+                clashGUI.getyTile().text = fromIndex(it).second.toString()
+
+            }
+
+        clashGUI.getxTile().addActionListener {
+            val i = toIndex(clashGUI.getxTile().text.toInt(), clashGUI.getyTile().text.toInt())
+            clashGUI.tilesTable.setRowSelectionInterval(i, i)
+            clashGUI.tilesTable.scrollRectToVisible(clashGUI.tilesTable.getCellRect(i, 0, true))
+        }
+
+        clashGUI.getyTile().addActionListener {
+            val i = toIndex(clashGUI.getxTile().text.toInt(), clashGUI.getyTile().text.toInt())
+            clashGUI.tilesTable.setRowSelectionInterval(i, i)
+            clashGUI.tilesTable.scrollRectToVisible(clashGUI.tilesTable.getCellRect(i, 0, true))
+        }
     }
 
     private fun initializePlayers() {
