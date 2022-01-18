@@ -51,17 +51,17 @@ class ClashSaveEditor(title: String) : JFrame() {
 
     private fun createUI(title: String) {
         setTitle(title)
-        defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+        defaultCloseOperation = EXIT_ON_CLOSE
         setSize(300, 200)
         setLocationRelativeTo(null)
 
         clashGUI = ClashGUI()
 
-        selectionController = SelectionController().withBytesTable(clashGUI.bytesTable);
+        selectionController = SelectionController().withBytesTable(clashGUI.bytesTable)
 
         clashGUI.loadButton.addActionListener {
             withFile("E:/Gry/Clash/save") {
-                save = parseFile(it.readBytes());
+                save = parseFile(it.readBytes())
 
                 initializeUnits()
 
@@ -87,22 +87,32 @@ class ClashSaveEditor(title: String) : JFrame() {
     }
 
     private fun initializeScripts() {
+        class FunctionWrapper(val function: KFunction<*>) {
+            override fun toString(): String {
+                return function.name
+            }
+        }
         Scripts::class.functions
             .filter { it.hasAnnotation<ClashScript>() }
             .forEach {
-                clashGUI.scriptBox.addItem(it)
+                clashGUI.scriptBox.addItem(FunctionWrapper(it))
             }
 
         clashGUI.executeButton.addActionListener {
-            print((clashGUI.scriptBox.selectedItem as KFunction<*>).call(Scripts::class.objectInstance, save))
+            println(
+                (clashGUI.scriptBox.selectedItem as FunctionWrapper).function.call(
+                    Scripts::class.objectInstance,
+                    save
+                )
+            )
         }
     }
 
 
     private fun withFile(pathName: String, function: (file: File) -> Unit) {
-        val fc = JFileChooser();
-        fc.currentDirectory = File(pathName);
-        val returnVal = fc.showOpenDialog(this);
+        val fc = JFileChooser()
+        fc.currentDirectory = File(pathName)
+        val returnVal = fc.showOpenDialog(this)
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             function.invoke(fc.selectedFile)
         }
