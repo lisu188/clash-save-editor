@@ -5,24 +5,25 @@ import java.math.BigInteger
 val converters = mapOf(
     Byte::class to ByteConverter::class.objectInstance,
     String::class to StringConverter::class.objectInstance,
-    Int::class to IntConverter::class.objectInstance
+    Int::class to IntConverter::class.objectInstance,
+    List::class to ListConverter::class.objectInstance
 )
 
 interface Converter {
-    fun toString(t: Any): String;
+    fun toString(t: Any): String
     fun fromString(s: String): Any
 
-    fun toBytes(t: Any): List<Byte>;
+    fun toBytes(t: Any): List<Byte>
     fun fromBytes(s: List<Byte>): Any
 }
 
 object ByteConverter : Converter {
     override fun toString(t: Any): String {
-        return t.toString();
+        return t.toString()
     }
 
     override fun fromString(s: String): Any {
-        return s.toByte();
+        return s.toByte()
     }
 
     override fun toBytes(t: Any): List<Byte> {
@@ -32,7 +33,25 @@ object ByteConverter : Converter {
     override fun fromBytes(s: List<Byte>): Any {
         return s.first()
     }
+}
 
+object ListConverter : Converter {
+    override fun toString(t: Any): String {
+        return (t as List<*>).joinToString(",", "[", "]")
+    }
+
+    override fun fromString(s: String): Any {
+        return s.subSequence(1, s.length - 2).split(",").map { it.toByte() }
+    }
+
+    override fun toBytes(t: Any): List<Byte> {
+        @Suppress("UNCHECKED_CAST")
+        return t as List<Byte>
+    }
+
+    override fun fromBytes(s: List<Byte>): Any {
+        return s
+    }
 }
 
 object StringConverter : Converter {
@@ -57,11 +76,11 @@ object StringConverter : Converter {
 
 object IntConverter : Converter {
     override fun toString(t: Any): String {
-        return t.toString();
+        return t.toString()
     }
 
     override fun fromString(s: String): Any {
-        return s.toInt();
+        return s.toInt()
     }
 
     override fun toBytes(t: Any): List<Byte> {

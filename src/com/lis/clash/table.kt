@@ -147,6 +147,7 @@ class BytesTableModel(val selectionController: SelectionController) : AbstractTa
     private fun getCurrentData() = selectionController.currentSelectedTable?._data
 
     override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) {
+        println(getByteIndex(rowIndex, columnIndex))//TODO: better
         getCurrentObject()?.changeByte(getByteIndex(rowIndex, columnIndex), (aValue as String).toByte())
     }
 

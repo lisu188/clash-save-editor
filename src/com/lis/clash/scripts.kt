@@ -36,4 +36,11 @@ object Scripts {
         return save.tiles.map { it.type3 to it.type4 }
             .toSortedSet(compareBy<Pair<Byte, Byte>> { it.first }.thenBy { it.second })
     }
+
+    @ClashScript
+    fun exploreAll(save: Save) {
+        return save.players.forEach {
+            it.explored = List(1300) { Integer.valueOf(255).toByte() }
+        }
+    }
 }
