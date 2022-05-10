@@ -72,10 +72,10 @@ class ClashSaveEditor(title: String) : JFrame() {
                 initializeCastles()
 
                 initializeMap()
-
-                initializeScripts()
             }
         }
+
+        initializeScripts()
 
         clashGUI.saveButton.addActionListener {
             withFile("E:/Gry/Clash/save") {
