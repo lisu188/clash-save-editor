@@ -6,19 +6,12 @@ annotation class ClashScript
 
 object Scripts {
     @ClashScript
-    fun setTile(save: Save) {
-        var x = 14
-        var y = 23
-        countTiles(save).stream().limit(100).forEach {
-            if (y == 33) {
-                y = 23
-                x++
-            }
-            val index = toIndex(x, y++)
-            save.tiles[index].type1 = 0
-            save.tiles[index].type2 = 0
-            save.tiles[index].type3 = it.first
-            save.tiles[index].type4 = it.second
+    fun setTiles(save: Save) {
+        save.tiles.stream().forEach {
+            it.type1 = 0
+            it.type2 = 1
+            it.type3 = -1
+            it.type4 = -1
         }
 
     }
