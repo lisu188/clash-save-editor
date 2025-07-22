@@ -6,6 +6,17 @@ This project uses Gradle with Kotlin support.
 - **Java 9** or higher (toolchain target is 9)
 - **Kotlin 1.9.x** (handled by Gradle)
 
+## Setup
+
+Run the helper script to fetch IntelliJ dependencies and build offline:
+
+```bash
+./setup.sh
+```
+
+If the downloads are blocked, place the required files inside `local-repo`
+and rerun the script.
+
 ## Building
 Run the following command with your system-installed Gradle:
 
