@@ -1,39 +1,82 @@
 package com.lis.clash
 
 import com.lis.clash.objects.Save
+import com.lis.clash.objects.Army
+import com.lis.clash.objects.Castle
+import com.lis.clash.objects.Unit
+import kotlin.math.sqrt
 
 annotation class ClashScript
 
 object Scripts {
+    /**
+     * Count how many tiles of each terrainId you have,
+     * so you can verify your TERRAIN enum is complete.
+     */
     @ClashScript
-    fun setTiles(save: Save) {
-        save.tiles.stream().forEach {
-            it.type1 = 0
-            it.type2 = 1
-            it.type3 = -1
-            it.type4 = -1
+    fun dumpTerrainCounts(save: Save): Map<Int, Int> =
+        save.tiles
+            .groupingBy { it.terrainId }
+            .eachCount()
+
+    /**
+     * Quickly locate every occupied tile,
+     * returning (tileIndex, terrainId, occupantId).
+     */
+    @ClashScript
+    fun findOccupiedTiles(save: Save): List<Triple<Int, Int, Int>> =
+        save.tiles
+            .mapIndexed { idx, t -> Triple(idx, t.terrainId, t.occupantId) }
+            .filter { it.third != 0 && it.third != 0xFFFF }
+
+
+    /**
+     * Find the tile‐indices of every unit of a given typeId
+     * (e.g. typeId 0x0002 might be “Archer”).
+     */
+    @ClashScript
+    fun findUnitsByType(save: Save, typeId: Int): List<Int> =
+        buildList<Unit> {
+            save.armies.forEach { addAll(it.units) }
+            save.castles.forEach { addAll(it.units) }
         }
+            .filter { it.type.toInt() == typeId }
+            .map { it.index }  // or some .tileIndex property if you add one
 
+    /**
+     * For a given tile‐index, list its 8 neighbors’ terrainIds.
+     * Computes width = sqrt(tileCount).
+     */
+    @ClashScript
+    fun listNeighbors(save: Save, centerIdx: Int): List<Pair<Int, Int>> {
+        val count = save.tiles.size
+        val width = sqrt(count.toDouble()).toInt()
+        val height = count / width
+        val x = centerIdx % width
+        val y = centerIdx / width
+        return sequence {
+            for (dy in -1..1) for (dx in -1..1) {
+                if (dx == 0 && dy == 0) continue
+                val nx = x + dx
+                val ny = y + dy
+                if (nx in 0 until width && ny in 0 until height) {
+                    val ni = ny * width + nx
+                    yield(nx to save.tiles[ni].terrainId)
+                }
+            }
+        }.toList()
     }
 
+    /**
+     * Export all castle positions as (tileIndex, castleType).
+     */
     @ClashScript
-    fun findTreasures(save: Save): List<Pair<Int, Int>> {
-        return save.tiles.mapIndexed { index, tile ->
-            index to tile
-        }.filter { TILE.TREASURE.matches(it.second) }
-            .map { fromIndex(it.first) }
-    }
-
-    @ClashScript
-    fun countTiles(save: Save): Set<Pair<Byte, Byte>> {
-        return save.tiles.map { it.type3 to it.type4 }
-            .toSortedSet(compareBy<Pair<Byte, Byte>> { it.first }.thenBy { it.second })
-    }
-
-    @ClashScript
-    fun exploreAll(save: Save) {
-        return save.players.forEach {
-            it.explored = List(1300) { Integer.valueOf(255).toByte() }
+    fun dumpCastles(save: Save): List<Pair<Int, Int>> {
+        val count = save.tiles.size
+        val width = sqrt(count.toDouble()).toInt()
+        return save.castles.map { castle ->
+            val idx = castle.y.toInt() * width + castle.x.toInt()
+            idx to castle.type.toInt()
         }
     }
 }
