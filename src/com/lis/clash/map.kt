@@ -35,7 +35,7 @@ class MapPanel : JPanel() {
             val y = fromIndex(index).second
             val x = fromIndex(index).first
             g.color = (Color(colorByte, colorByte, colorByte))
-            g.fillRect(x * size, y * size, (x + 1) * size, (y + 1) * size)
+            g.fillRect(x * size, y * size, size, size)
         }
     }
 }
