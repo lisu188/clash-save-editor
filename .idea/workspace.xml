@@ -1,26 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="5287f727-f5b9-4b2a-acf3-8ae0bd41d0e3" name="Default Changelist" comment="parser working">
-      <change afterPath="$PROJECT_DIR$/src/com/lis/clash/scripts.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/lis/clash/types.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clash-save-editor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/clash-save-editor.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.form" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.form" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/ClashGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/clash.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/clash.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/converters.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/converters.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/map.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/map.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/objects/Army.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/objects/Army.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/objects/Castle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/objects/Castle.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/objects/ClashObject.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/objects/ClashObject.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/objects/Player.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/objects/Player.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/objects/Save.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/objects/Save.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/objects/Tile.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/objects/Tile.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/objects/Unit.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/objects/Unit.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/parser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/parser.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/table.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/table.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +22,23 @@
   </component>
   <component name="ComposerSettings">
     <execution />
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="clash-save-editor" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -58,7 +61,6 @@
     </option>
     <option name="importingSettings">
       <MavenImportingSettings>
-        <option name="createModuleGroups" value="true" />
         <option name="downloadDocsAutomatically" value="true" />
         <option name="downloadSourcesAutomatically" value="true" />
       </MavenImportingSettings>
@@ -68,31 +70,18 @@
     <option name="version" value="1" />
   </component>
   <component name="ProjectId" id="1UAJl0PtvEnCVDmKrEidI12JZw0" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="autoscrollFromSource" value="true" />
     <option name="autoscrollToSource" value="true" />
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="UI_DESIGNER_EDITOR_MODE.UIDesignerToolWindowManager.WIDTH" value="455" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/OneDrive/Pulpit/springJmsTemplateExample" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.detected.package.tslint" value="true" />
-    <property name="node.js.path.for.package.eslint" value="project" />
-    <property name="node.js.path.for.package.tslint" value="project" />
-    <property name="node.js.selected.package.eslint" value="(autodetect)" />
-    <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="project.structure.last.edited" value="SDKs" />
-    <property name="project.structure.proportion" value="0.35859376" />
-    <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="project.kotlinCompiler" />
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "git-widget-placeholder": "main",
+    "node.js.selected.package.tslint": "(autodetect)"
+  }
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\andrz\git\clash-save-editor\src\com\lis\clash" />
@@ -112,6 +101,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file enabled="true" id="idea.log" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <method v="2">
@@ -126,14 +124,8 @@
       </method>
     </configuration>
     <configuration name="com.lis.clash.ClashKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <module name="clash-save-editor" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PASS_PARENT_ENVS" value="true" />
       <option name="MAIN_CLASS_NAME" value="com.lis.clash.ClashKt" />
-      <option name="WORKING_DIRECTORY" />
+      <module name="clash-save-editor" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -147,20 +139,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
-      <module name="" />
-      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
-      <option name="PROGRAM_PARAMETERS" />
-      <predefined_log_file enabled="true" id="idea.log" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.com.lis.clash.ClashKt" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
