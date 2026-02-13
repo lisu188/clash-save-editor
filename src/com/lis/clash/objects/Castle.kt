@@ -4,6 +4,14 @@ import com.lis.clash.ClashAggregateProperty
 import com.lis.clash.ClashSimpleProperty
 
 class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
+    companion object {
+        // Derived from clash95.c symbols: Building_BuildHospital/Barracks/Workshop/School.
+        const val BUILDING_HOSPITAL = 1
+        const val BUILDING_BARRACKS = 2
+        const val BUILDING_WORKSHOP = 4
+        const val BUILDING_SCHOOL = 8
+    }
+
     @ClashSimpleProperty(0, 1)
     var x: Byte by clashProperty(0)
 
@@ -52,6 +60,19 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
 
     @ClashSimpleProperty(425, 1)
     var walls: Byte by clashProperty(0)
+
+    fun hasBuilding(flag: Int): Boolean {
+        return (building.toInt() and flag) != 0
+    }
+
+    fun buildingNames(): List<String> {
+        val result = mutableListOf<String>()
+        if (hasBuilding(BUILDING_HOSPITAL)) result += "hospital"
+        if (hasBuilding(BUILDING_BARRACKS)) result += "barracks"
+        if (hasBuilding(BUILDING_WORKSHOP)) result += "workshop"
+        if (hasBuilding(BUILDING_SCHOOL)) result += "school"
+        return result
+    }
 
     override fun isValid(): Boolean {
         return type.toInt() != -1

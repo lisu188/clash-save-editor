@@ -52,6 +52,22 @@ object Scripts {
         return "Save data exported to \"${outputFile.absolutePath}\""
     }
 
+    @ClashScript
+    fun listCastleBuildings(save: Save): String {
+        if (save.castles.isEmpty()) {
+            return "No castles found"
+        }
+
+        return save.castles.joinToString("\n") { castle ->
+            val buildings = castle.buildingNames().ifEmpty { listOf("none") }
+            val x = castle.x.toInt() and 0xFF
+            val y = castle.y.toInt() and 0xFF
+            val owner = castle.player.toInt() and 0xFF
+            val wallLevel = castle.walls.toInt() and 0xFF
+            "Castle(${x},${y}) owner=${owner} walls=${wallLevel} buildings=${buildings.joinToString(",")}"
+        }
+    }
+
     private fun writeSaveData(save: Save): File {
         val saveMap = save.toStructuredMap()
         val json = saveMap.toJsonString()
