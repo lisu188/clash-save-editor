@@ -26,9 +26,13 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
             if (oldValue != newValue) {
                 getClassDescriptor(this::class).getSimpleProperty(property.name)?.let {
                     val toBytes = it.getConverter().toBytes(newValue!!)
-                    val augumentedBytes =
-                        if (toBytes.size < it.length()) toBytes + List(it.length() - toBytes.size) { -1 } else toBytes
-                    refreshBytes(it.index(), augumentedBytes)
+                    val boundedBytes = if (toBytes.size > it.length()) {
+                        toBytes.take(it.length())
+                    } else {
+                        val preservedTail = bytes.slice((it.index() + toBytes.size) until (it.index() + it.length()))
+                        toBytes + preservedTail
+                    }
+                    refreshBytes(it.index(), boundedBytes)
                 }
 
                 getClassDescriptor(this::class).getAggregateProperty(property.name)?.let {
