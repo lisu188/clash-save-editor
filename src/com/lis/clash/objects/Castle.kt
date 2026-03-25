@@ -40,7 +40,14 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     var peasants: Byte by clashProperty(0)
 
     @ClashSimpleProperty(434, 1)
-    var hapiness: Byte by clashProperty(0)
+    var happiness: Byte by clashProperty(0)
+
+    @Deprecated("Use happiness", ReplaceWith("happiness"))
+    var hapiness: Byte
+        get() = happiness
+        set(value) {
+            happiness = value
+        }
 
     @ClashSimpleProperty(438, 1)
     var gold: Byte by clashProperty(0)
