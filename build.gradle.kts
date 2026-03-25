@@ -11,6 +11,10 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    testImplementation(kotlin("test"))
+}
+
 intellij {
     version.set("2023.1")
     instrumentCode.set(true)
@@ -48,4 +52,8 @@ val fatJar = tasks.register<Jar>("fatJar") {
 
 tasks.build {
     dependsOn(fatJar)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
