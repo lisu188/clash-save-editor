@@ -228,6 +228,7 @@ object AnnotationParser {
         return classes.computeIfAbsent(klas) { parseClass(it) }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun parseClass(klas: KClass<out ClashObject>): ClassDescriptor {
         return ClassDescriptor(klas.memberProperties.filter { it is KMutableProperty<*> }
             .map { it as KMutableProperty<ClashObject> }
