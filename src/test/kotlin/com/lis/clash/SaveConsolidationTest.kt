@@ -16,20 +16,20 @@ class SaveConsolidationTest {
     }
 
     @Test
-    fun `editing fixed-length string preserves trailing bytes`() {
+    fun `editing fixed-length string zero pads trailing bytes`() {
         val base = MutableList(saveSize) { 42.toByte() }
         base[firstCastleOffset + 4] = 1
 
         val save = Save().withBytes<Save>(base)
-        save.castles.first().name = "AB"
+        save.castles.first().displayName = "AB"
 
         val edited = save.bytes
         assertEquals('A'.code.toByte(), edited[firstCastleOffset + 5])
         assertEquals('B'.code.toByte(), edited[firstCastleOffset + 6])
 
-        // Remaining bytes in the fixed-width field should stay unchanged.
+        // Remaining bytes in the fixed-width field should be zero padded.
         for (i in 7..14) {
-            assertEquals(42.toByte(), edited[firstCastleOffset + i])
+            assertEquals(0.toByte(), edited[firstCastleOffset + i])
         }
     }
 
@@ -105,6 +105,6 @@ class SaveConsolidationTest {
         val save = Save().withBytes<Save>(base)
 
         assertEquals(1, save.players.first().isActive)
-        assertEquals("Drebegen\u0000\u0000\u0000", save.players.first().displayName)
+        assertEquals("Drebegen", save.players.first().displayName)
     }
 }

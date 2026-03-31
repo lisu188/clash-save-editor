@@ -23,15 +23,32 @@ class DynamicTableModel(val _data: () -> List<ClashObject>, val dataClass: KClas
     }
 
     override fun getValueAt(row: Int, col: Int): Any? {
-        return getClassDescriptor(dataClass).getSimpleProperty(col).get(_data()[row])
+        return formatValue(getClassDescriptor(dataClass).getSimpleProperty(col).get(_data()[row]))
     }
 
     override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean {
-        return true
+        return getClassDescriptor(dataClass).getSimpleProperty(columnIndex).get(_data()[rowIndex]) !is List<*>
     }
 
     override fun setValueAt(aValue: Any, row: Int, col: Int) {
         return getClassDescriptor(dataClass).getSimpleProperty(col).setString(_data()[row], aValue as String)
+    }
+
+    private fun formatValue(value: Any?): Any? = when (value) {
+        is List<*> -> {
+            val preview = value.take(8).joinToString(",") { element ->
+                when (element) {
+                    is Byte -> element.toInt().toString()
+                    else -> element.toString()
+                }
+            }
+            if (value.size > 8) {
+                "[$preview,...] (len=${value.size})"
+            } else {
+                "[$preview]"
+            }
+        }
+        else -> value
     }
 }
 

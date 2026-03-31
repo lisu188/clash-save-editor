@@ -1,14 +1,23 @@
 package com.lis.clash
 
-import com.lis.clash.objects.Tile
+enum class UnitCategory {
+    FLYING,
+    CARGO,
+    SPECIAL_PERSONAGE
+}
 
 data class UnitTypeMetadata(
     val id: Int,
     val localizedNames: String,
-    val folder: String
+    val folder: String,
+    val categories: Set<UnitCategory> = emptySet()
 ) {
     val displayName: String
         get() = localizedNames.split(" / ").getOrNull(1) ?: localizedNames.split(" / ").first()
+
+    fun hasCategory(category: UnitCategory): Boolean {
+        return category in categories
+    }
 }
 
 object UnitTypes {
@@ -39,15 +48,15 @@ object UnitTypes {
         UnitTypeMetadata(23, "Szkielet / Skeleton", "szk"),
         UnitTypeMetadata(24, "Mag / Wizard", "mag"),
         UnitTypeMetadata(25, "Duch / Ghost", "duch"),
-        UnitTypeMetadata(26, "Orzeł / Eagle", "orzel"),
-        UnitTypeMetadata(27, "Pegaz / Pegasus", "pegaz"),
-        UnitTypeMetadata(28, "Skrzydlak / Winger", "skrz"),
-        UnitTypeMetadata(29, "Ważka / Fly / Riesenlibelle", "wazka"),
-        UnitTypeMetadata(30, "Smok / Dragon / Drachen", "smok"),
-        UnitTypeMetadata(31, "Złoto / Gold", "gold"),
-        UnitTypeMetadata(32, "Chłopi / Peasants", "peas"),
-        UnitTypeMetadata(33, "Dowódca / Tactician / Soldat", "specm"),
-        UnitTypeMetadata(34, "Dowódca / Tactician / Soldat", "speck")
+        UnitTypeMetadata(26, "Orzeł / Eagle", "orzel", setOf(UnitCategory.FLYING)),
+        UnitTypeMetadata(27, "Pegaz / Pegasus", "pegaz", setOf(UnitCategory.FLYING)),
+        UnitTypeMetadata(28, "Skrzydlak / Winger", "skrz", setOf(UnitCategory.FLYING)),
+        UnitTypeMetadata(29, "Ważka / Fly / Riesenlibelle", "wazka", setOf(UnitCategory.FLYING)),
+        UnitTypeMetadata(30, "Smok / Dragon / Drachen", "smok", setOf(UnitCategory.FLYING)),
+        UnitTypeMetadata(31, "Złoto / Gold", "gold", setOf(UnitCategory.CARGO)),
+        UnitTypeMetadata(32, "Chłopi / Peasants", "peas", setOf(UnitCategory.CARGO)),
+        UnitTypeMetadata(33, "Dowódca / Tactician / Soldat", "specm", setOf(UnitCategory.SPECIAL_PERSONAGE)),
+        UnitTypeMetadata(34, "Dowódca / Tactician / Soldat", "speck", setOf(UnitCategory.SPECIAL_PERSONAGE))
     )
 
     private val byId = all.associateBy(UnitTypeMetadata::id)
@@ -55,11 +64,28 @@ object UnitTypes {
     fun metadata(typeId: Int): UnitTypeMetadata? = byId[typeId]
 }
 
-enum class TILE(val type1: Byte, val type2: Byte) {
-    GRASS(0, 0),
-    TREASURE(-16, 2);
+data class QueuedPathWaypoint(
+    val tileRow: Int,
+    val tileColumn: Int,
+    val cumulativeCost: Int
+)
 
-    fun matches(tile: Tile): Boolean {
-        return tile.type1 == type1 && tile.type2 == type2
-    }
+data class RawSixByteRecord(
+    val rawBytes: List<Byte>
+) {
+    val marker: Int
+        get() = rawBytes.firstOrNull()?.toInt() ?: -1
+
+    val isEmpty: Boolean
+        get() = rawBytes.firstOrNull() == (-1).toByte()
+}
+
+data class GarrisonOrder(
+    val rawValue: Int
+) {
+    val trainCountdown: Int
+        get() = rawValue and 0x07
+
+    val repairCountdown: Int
+        get() = (rawValue ushr 3) and 0x07
 }

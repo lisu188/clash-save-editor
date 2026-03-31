@@ -2,6 +2,7 @@ package com.lis.clash.objects
 
 import com.lis.clash.ClashMaskedProperty
 import com.lis.clash.ClashSimpleProperty
+import com.lis.clash.RawSixByteRecord
 
 class Player(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSimpleProperty(0, 4)
@@ -39,4 +40,20 @@ class Player(parent: ClashObject, index: Int) : ClashObject(parent, index) {
 
     @ClashSimpleProperty(57, 1300)
     var revealedTilesBitset: List<Byte> by clashProperty(emptyList())
+
+    @ClashSimpleProperty(1357, 60)
+    var prisonerTransferQueueRaw: List<Byte> by clashProperty(emptyList())
+
+    @ClashSimpleProperty(1419, 1)
+    var queenRelationshipState: Int by clashProperty(0)
+
+    @ClashSimpleProperty(1420, 1)
+    var queenPortraitIndex: Int by clashProperty(0)
+
+    @ClashSimpleProperty(1421, 2)
+    var queenNextRelationshipCheckTurn: Int by clashProperty(0)
+
+    fun prisonerTransferQueueEntries(): List<RawSixByteRecord> {
+        return prisonerTransferQueueRaw.chunked(6).map(::RawSixByteRecord)
+    }
 }
