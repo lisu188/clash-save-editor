@@ -12,6 +12,13 @@ import kotlin.reflect.jvm.jvmErasure
 
 annotation class ClashSimpleProperty(val index: Int, val length: Int)
 
+annotation class ClashMaskedProperty(
+    val index: Int,
+    val length: Int,
+    val mask: Int,
+    val shift: Int = 0
+)
+
 annotation class ClashAggregateProperty(
     val index: Int,
     val count: Int,
@@ -36,11 +43,11 @@ abstract class ClashPropertyDescriptor(val _property: KMutableProperty<ClashObje
     }
 
     fun setString(_object: ClashObject, value: String) {
-        _property.setter.call(_object, getConverter().fromString(value))
+        _property.setter.call(_object, fromString(value))
     }
 
     fun setBytes(_object: ClashObject, value: List<Byte>) {
-        _property.setter.call(_object, getConverter().fromBytes(value))
+        _property.setter.call(_object, fromBytes(value))
     }
 
     fun set(_object: ClashObject, value: Any) {
@@ -51,6 +58,18 @@ abstract class ClashPropertyDescriptor(val _property: KMutableProperty<ClashObje
 
     fun getName(): String {
         return _property.name
+    }
+
+    open fun fromString(value: String): Any {
+        return getConverter().fromString(value)
+    }
+
+    open fun fromBytes(value: List<Byte>): Any {
+        return getConverter().fromBytes(value, length())
+    }
+
+    open fun toBytes(value: Any, currentBytes: List<Byte>): List<Byte> {
+        return getConverter().toBytes(value, length())
     }
 }
 
@@ -70,6 +89,43 @@ class SimplePropertyDescriptor(_property: KMutableProperty<ClashObject>) : Clash
 
     override fun getConverter(): Converter {
         return converters[_property.getter.returnType.jvmErasure]!!
+    }
+}
+
+class MaskedPropertyDescriptor(_property: KMutableProperty<ClashObject>) : ClashPropertyDescriptor(_property) {
+    private val annotation: ClashMaskedProperty = _property.findAnnotation()!!
+
+    override fun index(): Int {
+        return annotation.index
+    }
+
+    override fun length(): Int {
+        return annotation.length
+    }
+
+    override fun isSimple(): Boolean {
+        return true
+    }
+
+    override fun getConverter(): Converter {
+        return IntConverter
+    }
+
+    override fun fromString(value: String): Any {
+        return value.toInt()
+    }
+
+    override fun fromBytes(value: List<Byte>): Any {
+        val rawValue = readLittleEndianInt(value)
+        return (rawValue ushr annotation.shift) and annotation.mask
+    }
+
+    override fun toBytes(value: Any, currentBytes: List<Byte>): List<Byte> {
+        val currentValue = readLittleEndianInt(currentBytes)
+        val shiftedMask = annotation.mask shl annotation.shift
+        val maskedValue = (((value as Int) and annotation.mask) shl annotation.shift)
+        val updatedValue = (currentValue and shiftedMask.inv()) or maskedValue
+        return writeLittleEndianInt(updatedValue, length())
     }
 }
 
@@ -107,8 +163,8 @@ class AggregatePropertyDescriptor(_property: KMutableProperty<ClashObject>) : Cl
 
 class ClassDescriptor(val properties: List<ClashPropertyDescriptor>) {
 
-    fun getSimpleProperties(): List<SimplePropertyDescriptor> {
-        return properties.filter { it.isSimple() }.map { it as SimplePropertyDescriptor }
+    fun getSimpleProperties(): List<ClashPropertyDescriptor> {
+        return properties.filter { it.isSimple() }
     }
 
     fun getAggregateProperties(): List<AggregatePropertyDescriptor> {
@@ -129,7 +185,7 @@ class ClassDescriptor(val properties: List<ClashPropertyDescriptor>) {
         return getOrderedSimpleProperties()[col]
     }
 
-    fun getSimpleProperty(name: String): SimplePropertyDescriptor? {
+    fun getSimpleProperty(name: String): ClashPropertyDescriptor? {
         return getSimpleProperties().find { it.getName() == name }
     }
 
@@ -161,6 +217,8 @@ object AnnotationParser {
     private fun parseProperty(property: KMutableProperty<ClashObject>): ClashPropertyDescriptor? {
         if (property.hasAnnotation<ClashSimpleProperty>()) {
             return SimplePropertyDescriptor(property)
+        } else if (property.hasAnnotation<ClashMaskedProperty>()) {
+            return MaskedPropertyDescriptor(property)
         } else if (property.hasAnnotation<ClashAggregateProperty>()) {
             return AggregatePropertyDescriptor(property)
         }
