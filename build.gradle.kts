@@ -12,7 +12,11 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
+    implementation(kotlin("stdlib"))
+    implementation(kotlin("reflect"))
+    testImplementation(kotlin("test-junit5"))
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
 
 intellij {
@@ -20,19 +24,31 @@ intellij {
     instrumentCode.set(true)
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
 
 sourceSets {
     main {
         java {
             srcDir("src")
+            include("**/*.java")
             exclude("test/**")
         }
         kotlin {
             srcDir("src")
+            include("**/*.kt")
             exclude("test/**")
         }
         resources {
             srcDir("src")
+            include("**/*.form")
             exclude("test/**")
         }
     }
@@ -44,18 +60,28 @@ sourceSets {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "9"
+    kotlinOptions.jvmTarget = "17"
+}
+
+tasks.withType<org.jetbrains.intellij.tasks.InstrumentCodeTask>().configureEach {
+    instrumentationLogs.set(false)
+    logging.captureStandardOutput(LogLevel.INFO)
+    logging.captureStandardError(LogLevel.INFO)
+    doFirst {
+        ant.lifecycleLogLevel = AntBuilder.AntMessagePriority.ERROR
+    }
 }
 
 tasks.withType<JavaCompile> {
-    sourceCompatibility = "9"
-    targetCompatibility = "9"
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
 }
 
 val fatJar = tasks.register<Jar>("fatJar") {
     dependsOn(tasks.named("instrumentCode"))
     dependsOn(tasks.named("processResources"))
     archiveClassifier.set("all")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes["Main-Class"] = "com.lis.clash.ClashKt"
     }
