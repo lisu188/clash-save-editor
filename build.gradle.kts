@@ -53,12 +53,14 @@ tasks.withType<JavaCompile> {
 }
 
 val fatJar = tasks.register<Jar>("fatJar") {
-    dependsOn(tasks.named("classes"))
+    dependsOn(tasks.named("instrumentCode"))
+    dependsOn(tasks.named("processResources"))
     archiveClassifier.set("all")
     manifest {
         attributes["Main-Class"] = "com.lis.clash.ClashKt"
     }
-    from(sourceSets.main.get().output)
+    from(layout.buildDirectory.dir("instrumented/instrumentCode"))
+    from(layout.buildDirectory.dir("resources/main"))
     from({
         configurations.runtimeClasspath.get().filter { it.name.endsWith(".jar") }.map { zipTree(it) }
     })

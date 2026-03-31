@@ -30,6 +30,21 @@ internal fun writeLittleEndianInt(value: Int, length: Int): List<Byte> {
     }
 }
 
+internal fun readLittleEndianSignedInt(bytes: List<Byte>): Int {
+    val unsignedValue = readLittleEndianInt(bytes)
+    if (bytes.isEmpty() || bytes.size >= 4) {
+        return unsignedValue
+    }
+
+    val bitCount = bytes.size * 8
+    val signBit = 1 shl (bitCount - 1)
+    return if ((unsignedValue and signBit) != 0) {
+        unsignedValue - (1 shl bitCount)
+    } else {
+        unsignedValue
+    }
+}
+
 object ByteConverter : Converter {
     override fun toString(t: Any): String {
         return t.toString()
@@ -54,7 +69,12 @@ object ListConverter : Converter {
     }
 
     override fun fromString(s: String): Any {
-        return s.subSequence(1, s.length - 2).split(",").map { it.toByte() }
+        if (s == "[]") {
+            return emptyList<Byte>()
+        }
+        return s.subSequence(1, s.length - 1)
+            .split(",")
+            .map { it.trim().toByte() }
     }
 
     override fun toBytes(t: Any, length: Int): List<Byte> {
@@ -77,11 +97,12 @@ object StringConverter : Converter {
     }
 
     override fun toBytes(t: Any, length: Int): List<Byte> {
-        return (t as String).toByteArray().toList()
+        val encoded = (t as String).toByteArray().toList().take(length)
+        return encoded + List((length - encoded.size).coerceAtLeast(0)) { 0 }
     }
 
     override fun fromBytes(s: List<Byte>, length: Int): Any {
-        return String(s.toByteArray())
+        return String(s.toByteArray()).trimEnd('\u0000')
     }
 
 }
@@ -104,4 +125,22 @@ object IntConverter : Converter {
         return readLittleEndianInt(s.take(length))
     }
 
+}
+
+object SignedIntConverter : Converter {
+    override fun toString(t: Any): String {
+        return t.toString()
+    }
+
+    override fun fromString(s: String): Any {
+        return s.toInt()
+    }
+
+    override fun toBytes(t: Any, length: Int): List<Byte> {
+        return writeLittleEndianInt(t as Int, length)
+    }
+
+    override fun fromBytes(s: List<Byte>, length: Int): Any {
+        return readLittleEndianSignedInt(s.take(length))
+    }
 }

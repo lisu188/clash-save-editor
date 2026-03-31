@@ -1,9 +1,10 @@
 package com.lis.clash.objects
 
+import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashSimpleProperty
 
 class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
-    @ClashSimpleProperty(0, 1)
+    @ClashSignedProperty(0, 2)
     var typeId: Int by clashProperty(0)
 
     @ClashSimpleProperty(2, 1)
@@ -27,8 +28,14 @@ class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSimpleProperty(13, 1)
     var stateFlags: Int by clashProperty(0)
 
+    @ClashSimpleProperty(18, 4)
+    var auxRuntimeState: Int by clashProperty(0)
+
+    @ClashSimpleProperty(22, 1)
+    var stateBits2: Int by clashProperty(0)
+
     override fun isValid(): Boolean {
-        return typeId != 0xFF
+        return typeId != -1
     }
 
 }

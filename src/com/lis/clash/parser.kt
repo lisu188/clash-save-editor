@@ -12,6 +12,8 @@ import kotlin.reflect.jvm.jvmErasure
 
 annotation class ClashSimpleProperty(val index: Int, val length: Int)
 
+annotation class ClashSignedProperty(val index: Int, val length: Int)
+
 annotation class ClashMaskedProperty(
     val index: Int,
     val length: Int,
@@ -89,6 +91,26 @@ class SimplePropertyDescriptor(_property: KMutableProperty<ClashObject>) : Clash
 
     override fun getConverter(): Converter {
         return converters[_property.getter.returnType.jvmErasure]!!
+    }
+}
+
+class SignedPropertyDescriptor(_property: KMutableProperty<ClashObject>) : ClashPropertyDescriptor(_property) {
+    private val annotation: ClashSignedProperty = _property.findAnnotation()!!
+
+    override fun index(): Int {
+        return annotation.index
+    }
+
+    override fun length(): Int {
+        return annotation.length
+    }
+
+    override fun isSimple(): Boolean {
+        return true
+    }
+
+    override fun getConverter(): Converter {
+        return SignedIntConverter
     }
 }
 
@@ -217,6 +239,8 @@ object AnnotationParser {
     private fun parseProperty(property: KMutableProperty<ClashObject>): ClashPropertyDescriptor? {
         if (property.hasAnnotation<ClashSimpleProperty>()) {
             return SimplePropertyDescriptor(property)
+        } else if (property.hasAnnotation<ClashSignedProperty>()) {
+            return SignedPropertyDescriptor(property)
         } else if (property.hasAnnotation<ClashMaskedProperty>()) {
             return MaskedPropertyDescriptor(property)
         } else if (property.hasAnnotation<ClashAggregateProperty>()) {

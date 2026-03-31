@@ -24,6 +24,7 @@ class ClashSaveEditor(title: String) : JFrame() {
     private lateinit var selectionController: SelectionController
 
     private lateinit var save: Save
+    private var tileNavigationBound = false
 
     init {
         createUI(title)
@@ -94,11 +95,16 @@ class ClashSaveEditor(title: String) : JFrame() {
         }
         Scripts::class.functions
             .filter { it.hasAnnotation<ClashScript>() }
+            .sortedBy { it.name }
             .forEach {
                 clashGUI.scriptBox.addItem(FunctionWrapper(it))
             }
 
         clashGUI.executeButton.addActionListener {
+            if (!::save.isInitialized) {
+                println("Load a save before executing scripts")
+                return@addActionListener
+            }
             println(
                 (clashGUI.scriptBox.selectedItem as FunctionWrapper).function.call(
                     Scripts::class.objectInstance,
@@ -128,6 +134,14 @@ class ClashSaveEditor(title: String) : JFrame() {
 
     private fun initializeMap() {
         clashGUI.mapPanel.tiles = { save.tiles }
+        clashGUI.mapPanel.mapWidth = { save.mapWidthTiles.takeIf { it > 0 } ?: 100 }
+        clashGUI.mapPanel.mapHeight = { save.mapHeightTiles.takeIf { it > 0 } ?: 100 }
+        clashGUI.mapPanel.selectedTileIndex = { clashGUI.tilesTable.selectedRow }
+        clashGUI.mapPanel.onTileSelected = { tileIndex ->
+            selectTile(tileIndex)
+        }
+        clashGUI.mapPanel.revalidate()
+        clashGUI.mapPanel.repaint()
     }
 
     private fun initializeUnits() {
@@ -141,27 +155,41 @@ class ClashSaveEditor(title: String) : JFrame() {
         clashGUI.tilesTable.withData { save.tiles }
             .withSelectionController(selectionController)
             .withSelectionListener {
-                clashGUI.getxTile().text = fromIndex(it).first.toString()
-                clashGUI.getyTile().text = fromIndex(it).second.toString()
-
+                if (it >= 0) {
+                    val (tileRow, tileColumn) = fromIndex(it, save.mapWidthTiles.takeIf { width -> width > 0 } ?: 100)
+                    clashGUI.getxTile().text = tileRow.toString()
+                    clashGUI.getyTile().text = tileColumn.toString()
+                }
+                clashGUI.mapPanel.repaint()
             }
 
-        clashGUI.getxTile().addActionListener {
-            val i = toIndex(clashGUI.getxTile().text.toInt(), clashGUI.getyTile().text.toInt())
-            clashGUI.tilesTable.setRowSelectionInterval(i, i)
-            clashGUI.tilesTable.scrollRectToVisible(clashGUI.tilesTable.getCellRect(i, 0, true))
-        }
-
-        clashGUI.getyTile().addActionListener {
-            val i = toIndex(clashGUI.getxTile().text.toInt(), clashGUI.getyTile().text.toInt())
-            clashGUI.tilesTable.setRowSelectionInterval(i, i)
-            clashGUI.tilesTable.scrollRectToVisible(clashGUI.tilesTable.getCellRect(i, 0, true))
+        if (!tileNavigationBound) {
+            val tileNavigator = fun() {
+                if (!::save.isInitialized) {
+                    return
+                }
+                val mapWidth = save.mapWidthTiles.takeIf { it > 0 } ?: 100
+                val tileIndex = toIndex(clashGUI.getxTile().text.toInt(), clashGUI.getyTile().text.toInt(), mapWidth)
+                selectTile(tileIndex)
+            }
+            clashGUI.getxTile().addActionListener { tileNavigator() }
+            clashGUI.getyTile().addActionListener { tileNavigator() }
+            tileNavigationBound = true
         }
     }
 
     private fun initializePlayers() {
         clashGUI.playersTable.withData { save.players }
             .withSelectionController(selectionController)
+    }
+
+    private fun selectTile(tileIndex: Int) {
+        if (tileIndex !in save.tiles.indices) {
+            return
+        }
+        clashGUI.tilesTable.setRowSelectionInterval(tileIndex, tileIndex)
+        clashGUI.tilesTable.scrollRectToVisible(clashGUI.tilesTable.getCellRect(tileIndex, 0, true))
+        clashGUI.mapPanel.repaint()
     }
 }
 
