@@ -37,7 +37,7 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
                 }
 
                 getClassDescriptor(this::class).getAggregateProperty(property.name)?.let {
-                    for (ob in newValue as List<ClashObject>) {
+                    for (ob in (newValue as? List<*>)?.filterIsInstance<ClashObject>().orEmpty()) {
                         refreshBytes(ob.index, ob.bytes)
                     }
                 }
@@ -82,6 +82,7 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <T> withBytes(slice: List<Byte>): T {
         bytes = slice
         return this as T

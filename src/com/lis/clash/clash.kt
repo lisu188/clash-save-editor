@@ -58,7 +58,7 @@ class ClashSaveEditor(title: String) : JFrame() {
 
         clashGUI = ClashGUI()
 
-        selectionController = SelectionController().withBytesTable(clashGUI.bytesTable)
+        selectionController = SelectionController().withBytesTable(clashGUI.bytesTableView())
 
         clashGUI.loadButton.addActionListener {
             withFile("E:/Gry/Clash/save") {
@@ -125,34 +125,34 @@ class ClashSaveEditor(title: String) : JFrame() {
     }
 
     private fun initializeCastles() {
-        clashGUI.castlesTable.withData { save.castles }.withSubTable(
-            clashGUI.castleUnitTable.withSelectionController(selectionController), Castle::units
+        clashGUI.castlesTableView().withData { save.castles }.withSubTable(
+            clashGUI.castleUnitTableView().withSelectionController(selectionController), Castle::units
         )
             .withSelectionController(selectionController)
     }
 
 
     private fun initializeMap() {
-        clashGUI.mapPanel.tiles = { save.tiles }
-        clashGUI.mapPanel.mapWidth = { save.mapWidthTiles.takeIf { it > 0 } ?: 100 }
-        clashGUI.mapPanel.mapHeight = { save.mapHeightTiles.takeIf { it > 0 } ?: 100 }
-        clashGUI.mapPanel.selectedTileIndex = { clashGUI.tilesTable.selectedRow }
-        clashGUI.mapPanel.onTileSelected = { tileIndex ->
+        clashGUI.mapPanelView().tiles = { save.tiles }
+        clashGUI.mapPanelView().mapWidth = { save.mapWidthTiles.takeIf { it > 0 } ?: 100 }
+        clashGUI.mapPanelView().mapHeight = { save.mapHeightTiles.takeIf { it > 0 } ?: 100 }
+        clashGUI.mapPanelView().selectedTileIndex = { clashGUI.tilesTableView().selectedRow }
+        clashGUI.mapPanelView().onTileSelected = { tileIndex ->
             selectTile(tileIndex)
         }
-        clashGUI.mapPanel.revalidate()
-        clashGUI.mapPanel.repaint()
+        clashGUI.mapPanelView().revalidate()
+        clashGUI.mapPanelView().repaint()
     }
 
     private fun initializeUnits() {
-        clashGUI.armyUnitsTable.withData { save.armies }.withSubTable(
-            clashGUI.unitTable.withSelectionController(selectionController), Army::units
+        clashGUI.armyUnitsTableView().withData { save.armies }.withSubTable(
+            clashGUI.unitTableView().withSelectionController(selectionController), Army::units
         )
             .withSelectionController(selectionController)
     }
 
     private fun initializeTiles() {
-        clashGUI.tilesTable.withData { save.tiles }
+        clashGUI.tilesTableView().withData { save.tiles }
             .withSelectionController(selectionController)
             .withSelectionListener {
                 if (it >= 0) {
@@ -160,7 +160,7 @@ class ClashSaveEditor(title: String) : JFrame() {
                     clashGUI.getxTile().text = tileRow.toString()
                     clashGUI.getyTile().text = tileColumn.toString()
                 }
-                clashGUI.mapPanel.repaint()
+                clashGUI.mapPanelView().repaint()
             }
 
         if (!tileNavigationBound) {
@@ -179,7 +179,7 @@ class ClashSaveEditor(title: String) : JFrame() {
     }
 
     private fun initializePlayers() {
-        clashGUI.playersTable.withData { save.players }
+        clashGUI.playersTableView().withData { save.players }
             .withSelectionController(selectionController)
     }
 
@@ -187,11 +187,27 @@ class ClashSaveEditor(title: String) : JFrame() {
         if (tileIndex !in save.tiles.indices) {
             return
         }
-        clashGUI.tilesTable.setRowSelectionInterval(tileIndex, tileIndex)
-        clashGUI.tilesTable.scrollRectToVisible(clashGUI.tilesTable.getCellRect(tileIndex, 0, true))
-        clashGUI.mapPanel.repaint()
+        clashGUI.tilesTableView().setRowSelectionInterval(tileIndex, tileIndex)
+        clashGUI.tilesTableView().scrollRectToVisible(clashGUI.tilesTableView().getCellRect(tileIndex, 0, true))
+        clashGUI.mapPanelView().repaint()
     }
 }
+
+private fun ClashGUI.armyUnitsTableView(): ClashTable = armyUnitsTable as ClashTable
+
+private fun ClashGUI.unitTableView(): ClashTable = unitTable as ClashTable
+
+private fun ClashGUI.mapPanelView(): MapPanel = mapPanel as MapPanel
+
+private fun ClashGUI.tilesTableView(): ClashTable = tilesTable as ClashTable
+
+private fun ClashGUI.playersTableView(): ClashTable = playersTable as ClashTable
+
+private fun ClashGUI.castlesTableView(): ClashTable = castlesTable as ClashTable
+
+private fun ClashGUI.castleUnitTableView(): ClashTable = castleUnitTable as ClashTable
+
+private fun ClashGUI.bytesTableView(): BytesTable = bytesTable as BytesTable
 
 
 private fun createAndShowGUI() {
@@ -199,6 +215,6 @@ private fun createAndShowGUI() {
     frame.isVisible = true
 }
 
-fun main(args: Array<String>) {
+fun main() {
     EventQueue.invokeLater(::createAndShowGUI)
 }
