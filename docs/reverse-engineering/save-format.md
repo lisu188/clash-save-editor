@@ -5,7 +5,7 @@
 |---|---:|---:|---:|---|
 | Save name | 0 | 1 | 16 | High |
 | Tiles | 16 | 10000 | 14 | High |
-| Players | 140044 | 5 | 1423 | High |
+| Players | 140040 | 5 | 1423 | High |
 | Armies | 147190 | 500 | 725 | High |
 | Castles | 509690 | 10 | 467 | High |
 
@@ -24,8 +24,18 @@ Other bytes are currently unknown/reserved (Low).
 
 ### Player (1423 bytes)
 Known fields:
-- `name` at +0, length 10 (High)
-- `explored` at +53, length 1300 (Medium: behavior known, exact semantics partially known)
+- `isActive` at +0, length 4 (High)
+- `displayName` at +4, length 11 (High)
+- `cameraLeft` at +15, length 4 (High)
+- `cameraTop` at +19, length 4 (High)
+- `minimapVisibleFlag` at +23, length 4 (High)
+- `controllerMode` at +27, length 4 (High)
+- `religionFlag` at +39, length 4 (High)
+- `techLevel` at +47, low 3 bits (High)
+- `lastReportedTechLevel` at +48, low 3 bits (High)
+- `battleActionTakenFlag` at +49, length 4 (High)
+- `consecutiveIdleBattleTurns` at +53, length 4 (High)
+- `revealedTilesBitset` at +57, length 1300 (High)
 
 Other bytes unknown/reserved (Low).
 
@@ -41,12 +51,14 @@ Remaining bytes unknown/reserved (Low).
 
 ### Unit (31 bytes)
 Known fields:
-- `type` +0 (High for occupancy marker)
-- `move` +8 (Medium)
-- `health` +9 (Medium)
-- `shout` +10 (Low/Medium)
-- `morale` +11 (Medium)
-- `exp` +12 (Medium)
+- `typeId` +0 (High for occupancy marker)
+- `ownerPlayerIndex` +2 (High)
+- `currentActionPoints` +8 (High)
+- `currentHealthPercent` +9 (High)
+- `fatigue` +10 (High)
+- `morale` +11 (High)
+- `stanceBits` +12 (Medium/High)
+- `stateFlags` +13 (Medium/High)
 
 Remaining bytes unknown/reserved (Low).
 
@@ -59,13 +71,18 @@ Known fields:
 - `type` +4 (High for occupancy marker)
 - `name` +5, length 10 (High)
 - `units` +18, count 12, entry size 31 (High for layout)
-- `unitsToBuild` +402, length 12 (Medium)
-- `building` +416 (Medium/High for bit-mask use)
-- `canBuild` +420 (Low/Medium)
-- `walls` +425 (Medium)
-- `peasants` +430 (Medium)
-- `happiness` +434 (Medium)
-- `tax` +436 (Medium)
-- `gold` +438 (Medium)
+- `addonTypeIds` +402, length 12 (High)
+- `selectedAddonSlotIndex` +414 (High)
+- `castleAddonFlags` +416 (High)
+- `constructionLockFlags` +420 (High)
+- `wallStrength` +421 (High)
+- `upgradeTimerTurns` +429 (High)
+- `peasantCount` +430, low 12 bits (High)
+- `satisfaction` +434 (High)
+- `plagueState` +435, low 3 bits (High)
+- `taxRate` +436, low 6 bits (High)
+- `storedMoney` +438, length 4 (High)
+- `techLevelBits` +444, low 3 bits (High)
+- `castleFactId` +463, length 4 (High)
 
 Remaining bytes unknown/reserved (Low).

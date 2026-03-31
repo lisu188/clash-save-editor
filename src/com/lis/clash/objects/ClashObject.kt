@@ -25,7 +25,8 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
         return Delegates.observable(initialValue, { property, oldValue, newValue ->
             if (oldValue != newValue) {
                 getClassDescriptor(this::class).getSimpleProperty(property.name)?.let {
-                    val toBytes = it.getConverter().toBytes(newValue!!)
+                    val currentBytes = bytes.slice(it.index() until (it.index() + it.length()))
+                    val toBytes = it.toBytes(newValue!!, currentBytes)
                     val boundedBytes = if (toBytes.size > it.length()) {
                         toBytes.take(it.length())
                     } else {

@@ -23,9 +23,23 @@ intellij {
 
 sourceSets {
     main {
-        java.srcDir("src")
-        kotlin.srcDir("src")
-        resources.srcDir("src")
+        java {
+            srcDir("src")
+            exclude("test/**")
+        }
+        kotlin {
+            srcDir("src")
+            exclude("test/**")
+        }
+        resources {
+            srcDir("src")
+            exclude("test/**")
+        }
+    }
+
+    test {
+        java.srcDir("src/test/kotlin")
+        kotlin.srcDir("src/test/kotlin")
     }
 }
 

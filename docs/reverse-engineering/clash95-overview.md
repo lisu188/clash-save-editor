@@ -11,7 +11,7 @@ This project currently targets the binary save file layout represented by `Save`
 ## Current high-confidence anchors
 - Save header `name` at bytes `0..15` (**High**).
 - `tiles` block starts at offset `16`, `10000` entries, `14` bytes each (**High**).
-- `players` block starts at offset `140044`, `5` entries, `1423` bytes each (**High**).
+- `players` block starts at offset `140040`, `5` entries, `1423` bytes each (**High**).
 - `armies` block starts at offset `147190`, `500` entries, `725` bytes each (**High**).
 - `castles` block starts at offset `509690`, `10` entries, `467` bytes each (**High**).
 
@@ -21,8 +21,11 @@ This project currently targets the binary save file layout represented by `Save`
 - barracks
 - workshop
 - school
+- smiths
 
-These are represented as bit flags in `Castle.building` and exposed read-only via helper methods (`hasBuilding`, `buildingNames`).
+These are represented as bit flags in `Castle.castleAddonFlags` and exposed via helper methods (`hasBuilding`, `buildingNames`).
+
+The current code also treats recovered multi-byte integers as little-endian and preserves unrelated bits for masked fields such as `Player.techLevel`, `Castle.peasantCount`, `Castle.plagueState`, `Castle.taxRate`, and `Castle.techLevelBits`.
 
 ## Boundaries
 This consolidation pass intentionally does **not** infer additional semantics for unknown bytes inside each fixed-size record. Unknown bytes remain preserved.

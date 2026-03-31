@@ -1,8 +1,10 @@
 package com.lis.clash
 
 import com.lis.clash.objects.ClashObject
+import com.lis.clash.objects.Castle
 import com.lis.clash.objects.Save
 import com.lis.clash.objects.Tile
+import com.lis.clash.objects.Unit
 import java.io.File
 
 annotation class ClashScript
@@ -36,7 +38,7 @@ object Scripts {
     @ClashScript
     fun exploreAll(save: Save) {
         return save.players.forEach {
-            it.explored = List(1300) { Integer.valueOf(255).toByte() }
+            it.revealedTilesBitset = List(1300) { Integer.valueOf(255).toByte() }
         }
     }
 
@@ -63,7 +65,7 @@ object Scripts {
             val x = castle.x.toInt() and 0xFF
             val y = castle.y.toInt() and 0xFF
             val owner = castle.player.toInt() and 0xFF
-            val wallLevel = castle.walls.toInt() and 0xFF
+            val wallLevel = castle.wallStrength and 0xFF
             "Castle(${x},${y}) owner=${owner} walls=${wallLevel} buildings=${buildings.joinToString(",")}"
         }
     }
@@ -102,6 +104,18 @@ object Scripts {
             result["mapY"] = listIndex % 100
             val tileName = TILE.values().firstOrNull { it.matches(this) }?.name
             result["tileName"] = tileName
+        }
+
+        if (this is Unit) {
+            UnitTypes.metadata(typeId)?.let { metadata ->
+                result["unitTypeName"] = metadata.displayName
+                result["unitLocalizedNames"] = metadata.localizedNames
+                result["unitSpriteFolder"] = metadata.folder
+            }
+        }
+
+        if (this is Castle) {
+            result["buildingNames"] = buildingNames()
         }
 
         return result

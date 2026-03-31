@@ -10,9 +10,7 @@ This document tracks fields that are intentionally kept neutral.
 ## Low-confidence names still exposed in code
 - `Tile.type3`, `Tile.type4`
 - `Castle.appearance`
-- `Castle.canBuild`
 - `Army.dir`
-- `Unit.shout`
 
 These names are historical placeholders and do not imply complete semantic certainty.
 
