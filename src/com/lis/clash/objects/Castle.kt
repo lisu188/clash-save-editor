@@ -1,7 +1,10 @@
 package com.lis.clash.objects
 
 import com.lis.clash.ClashAggregateProperty
+import com.lis.clash.GarrisonOrder
 import com.lis.clash.ClashMaskedProperty
+import com.lis.clash.RawSixByteRecord
+import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashSimpleProperty
 
 class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
@@ -15,30 +18,33 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     }
 
     @ClashSimpleProperty(0, 1)
-    var x: Byte by clashProperty(0)
+    var tileRow: Int by clashProperty(0)
 
     @ClashSimpleProperty(1, 1)
-    var y: Byte by clashProperty(0)
+    var tileColumn: Int by clashProperty(0)
 
     @ClashSimpleProperty(2, 1)
-    var player: Byte by clashProperty(0)
+    var ownerPlayerIndex: Int by clashProperty(0)
 
     @ClashSimpleProperty(3, 1)
-    var appearance: Byte by clashProperty(0)
+    var appearance: Int by clashProperty(0)
 
-    @ClashSimpleProperty(4, 1)
-    var type: Byte by clashProperty(0)
+    @ClashSignedProperty(4, 1)
+    var footprintClass: Int by clashProperty(0)
 
     @ClashSimpleProperty(5, 10)
-    var name: String by clashProperty("")
+    var displayName: String by clashProperty("")
 
     @ClashAggregateProperty(18, 12, 31, Unit::class)
     var units: List<Unit> by clashProperty(emptyList())
 
+    @ClashSimpleProperty(390, 12)
+    var garrisonOrderBytes: List<Byte> by clashProperty(emptyList())
+
     @ClashSimpleProperty(402, 12)
     var addonTypeIds: List<Byte> by clashProperty(emptyList())
 
-    @ClashSimpleProperty(414, 1)
+    @ClashSignedProperty(414, 1)
     var selectedAddonSlotIndex: Int by clashProperty(0)
 
     @ClashSimpleProperty(416, 1)
@@ -71,6 +77,9 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashMaskedProperty(444, 1, 0x07)
     var techLevelBits: Int by clashProperty(0)
 
+    @ClashSimpleProperty(445, 18)
+    var prisonerSlotsRaw: List<Byte> by clashProperty(emptyList())
+
     @ClashSimpleProperty(463, 4)
     var castleFactId: Int by clashProperty(0)
 
@@ -88,7 +97,17 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
         return result
     }
 
+    fun garrisonOrders(): List<GarrisonOrder> {
+        return garrisonOrderBytes.map { raw ->
+            GarrisonOrder(raw.toInt() and 0xFF)
+        }
+    }
+
+    fun prisonerSlots(): List<RawSixByteRecord> {
+        return prisonerSlotsRaw.chunked(6).map(::RawSixByteRecord)
+    }
+
     override fun isValid(): Boolean {
-        return type.toInt() != -1
+        return footprintClass != -1
     }
 }
