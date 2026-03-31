@@ -5,13 +5,14 @@
 - A section entry is materialized into an object only while `isValid()` remains true for that entry type.
 
 ## Entry validity rules in current implementation
-- `Unit` is valid when `type != -1`.
+- `Unit` is valid when `typeId != 0xFF`.
 - `Army` is valid when it has at least one valid unit.
 - `Castle` is valid when `type != -1`.
 - `Tile` and `Player` currently have no additional validity guard beyond fixed slicing.
 
 ## Serialization invariants
 - Editing a known field updates only that field's byte window.
+- Masked numeric edits preserve unrelated bits in the same byte window.
 - If new field data is shorter than fixed field length, untouched tail bytes are preserved.
 - If new field data is longer than fixed field length, data is truncated to field length.
 - Non-edited regions are preserved byte-for-byte.
