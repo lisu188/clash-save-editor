@@ -74,6 +74,14 @@ tasks.withType<JavaCompile> {
     targetCompatibility = "17"
 }
 
+tasks.register<JavaExec>("runMcpServer") {
+    group = "application"
+    description = "Run the Clash save MCP server over stdio."
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("com.lis.clash.mcp.ClashSaveMcpServerKt")
+    standardInput = System.`in`
+}
+
 val fatJar = tasks.register<Jar>("fatJar") {
     dependsOn(tasks.named("instrumentCode"))
     dependsOn(tasks.named("processResources"))

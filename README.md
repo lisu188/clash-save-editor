@@ -37,3 +37,23 @@ java -jar build/libs/clash-save-editor-all.jar
 
 The build uses IntelliJ form instrumentation so `.form` UI files are compiled
 automatically.
+
+## MCP server
+
+The project also includes a stdio MCP server for LLM-assisted inspection and
+editing of Clash save files. During development, run it with:
+
+```bash
+./gradlew runMcpServer
+```
+
+After building the fat JAR, configure an MCP client to launch:
+
+```bash
+java -cp build/libs/clash-save-editor-all.jar com.lis.clash.mcp.ClashSaveMcpServerKt
+```
+
+The server exposes tools for schema discovery, save overviews, parsed object
+reads, raw byte reads, annotated property edits, and explicit raw byte writes.
+Structured edits require `outputPath` unless `inPlace=true`; in-place writes
+create a `.bak` file by default.

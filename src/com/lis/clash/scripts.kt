@@ -101,6 +101,26 @@ object Scripts {
     }
 
     @ClashScript
+    fun listShrines(save: Save): String {
+        return formatLocatedTiles(
+            title = "Shrines",
+            tiles = save.locatedTiles().filter { it.tile.isTemple() }
+        ) { locatedTile ->
+            "terrain=${formatTileId(locatedTile.tile.terrainTileId)} overlay=${formatTileId(locatedTile.tile.overlayTileId)} variant=${locatedTile.tile.templeVariant()} visitedOrEmpty=${locatedTile.tile.templeVisitedOrEmpty()}"
+        }
+    }
+
+    @ClashScript
+    fun listBuriedTreasure(save: Save): String {
+        return formatLocatedTiles(
+            title = "Buried treasure",
+            tiles = save.locatedTiles().filter { it.tile.isBuriedTreasure() }
+        ) { locatedTile ->
+            "terrain=${formatTileId(locatedTile.tile.terrainTileId)} overlay=${formatTileId(locatedTile.tile.overlayTileId)}"
+        }
+    }
+
+    @ClashScript
     fun listQueuedArmyPaths(save: Save): String {
         val queuedArmies = save.armies.mapIndexed { armyIndex, army -> armyIndex to army }
             .filter { (_, army) -> army.queuedPathWaypointCount > 0 }
@@ -223,7 +243,8 @@ object Scripts {
 
         val lines = save.castles.mapIndexed { castleIndex, castle ->
             val buildings = castle.buildingNames().ifEmpty { listOf("none") }
-            "castle#$castleIndex row=${castle.tileRow} column=${castle.tileColumn} owner=${castle.ownerPlayerIndex} flags=${castle.castleAddonFlags.toHex(2)} buildings=${buildings.joinToString(",")}"
+            val addons = castle.addonTypeNames().ifEmpty { listOf("none") }
+            "castle#$castleIndex row=${castle.tileRow} column=${castle.tileColumn} owner=${castle.ownerPlayerIndex} flags=${castle.castleAddonFlags.toHex(2)} buildings=${buildings.joinToString(",")} addonTypes=${addons.joinToString(",")}"
         }
         return renderSection("Castle add-on flags", save.castles.size, lines)
     }
@@ -306,6 +327,15 @@ object Scripts {
                 "terrain=${formatTileId(key.first)} overlay=${formatTileId(key.second)} roadOrBridge=${formatTileId(key.third)} count=$count"
             }
         return renderSection("Tile combinations", counts.size, lines, 50)
+    }
+
+    @ClashScript
+    fun summarizeUnitExperience(save: Save): String {
+        return summarizeUnitField(
+            title = "Unit experience levels",
+            values = save.locatedUnits().map { it.unit.experienceLevel },
+            formatter = { value -> value.toString() }
+        )
     }
 
     @ClashScript
@@ -399,6 +429,10 @@ object Scripts {
                 result["roadOrBridgeTileIdHex"] = roadOrBridgeTileId.toHex(4)
                 result["hasOverlay"] = hasOverlay()
                 result["hasRoadOrBridge"] = hasRoadOrBridge()
+                result["isTemple"] = isTemple()
+                result["templeVariant"] = templeVariant()
+                result["templeVisitedOrEmpty"] = templeVisitedOrEmpty()
+                result["isBuriedTreasure"] = isBuriedTreasure()
             }
 
             is Unit -> {
@@ -408,6 +442,11 @@ object Scripts {
                     result["unitSpriteFolder"] = metadata.folder
                     result["unitCategories"] = metadata.categories.map { it.name.lowercase() }
                 }
+                result["isFullyExperienced"] = hasMaximumExperience()
+                result["hasLowMoraleFlag"] = hasLowMoraleFlag()
+                result["moraleBand"] = moraleBand()
+                result["fatigueBand"] = fatigueBand()
+                result["moraleFatigueProtectedType"] = isMoraleFatigueProtectedType()
                 result["stanceBitsHex"] = stanceBits.toHex(2)
                 result["stateFlagsHex"] = stateFlags.toHex(2)
                 result["stateBits2Hex"] = stateBits2.toHex(2)
@@ -438,6 +477,14 @@ object Scripts {
 
             is Castle -> {
                 result["buildingNames"] = buildingNames()
+                result["addonSlots"] = addonSlots().map { slot ->
+                    linkedMapOf<String, Any?>(
+                        "slotIndex" to slot.slotIndex,
+                        "typeId" to slot.typeId,
+                        "typeName" to slot.displayName
+                    )
+                }
+                result["addonTypeNames"] = addonTypeNames()
                 result["garrisonOrders"] = garrisonOrders().map { order ->
                     linkedMapOf<String, Any>(
                         "rawValue" to order.rawValue,
@@ -549,6 +596,12 @@ object Scripts {
                 append(locatedUnit.unit.fatigue)
                 append(" morale=")
                 append(locatedUnit.unit.morale)
+                append(" exp=")
+                append(locatedUnit.unit.experienceLevel)
+                append("/")
+                append(locatedUnit.unit.experienceProgress)
+                append(" moraleBand=")
+                append(locatedUnit.unit.moraleBand())
                 append(" stance=")
                 append(locatedUnit.unit.stanceBits.toHex(2))
                 val extra = extraFormatter(locatedUnit)
