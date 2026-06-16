@@ -137,6 +137,14 @@ class MaskedPropertyDescriptor(_property: KMutableProperty<ClashObject>) : Clash
         return value.toInt()
     }
 
+    fun mask(): Int {
+        return annotation.mask
+    }
+
+    fun shift(): Int {
+        return annotation.shift
+    }
+
     override fun fromBytes(value: List<Byte>): Any {
         val rawValue = readLittleEndianInt(value)
         return (rawValue ushr annotation.shift) and annotation.mask

@@ -1,6 +1,8 @@
 package com.lis.clash.objects
 
 import com.lis.clash.ClashAggregateProperty
+import com.lis.clash.CastleAddonSlot
+import com.lis.clash.CastleAddonTypes
 import com.lis.clash.GarrisonOrder
 import com.lis.clash.ClashMaskedProperty
 import com.lis.clash.RawSixByteRecord
@@ -95,6 +97,23 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
         if (hasBuilding(BUILDING_SCHOOL)) result += "school"
         if (hasBuilding(BUILDING_SMITHS)) result += "smiths"
         return result
+    }
+
+    fun addonSlots(): List<CastleAddonSlot> {
+        return addonTypeIds.mapIndexedNotNull { slotIndex, rawTypeId ->
+            val typeId = rawTypeId.toInt() and 0xFF
+            if (typeId == CastleAddonTypes.EMPTY_SLOT) {
+                null
+            } else {
+                CastleAddonSlot(slotIndex, typeId, CastleAddonTypes.metadata(typeId)?.displayName)
+            }
+        }
+    }
+
+    fun addonTypeNames(): List<String> {
+        return addonSlots().map { slot ->
+            slot.displayName ?: "unknown(${slot.typeId})"
+        }
     }
 
     fun garrisonOrders(): List<GarrisonOrder> {
