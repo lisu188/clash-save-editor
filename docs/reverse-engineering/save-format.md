@@ -5,7 +5,7 @@
 |---|---:|---:|---:|---|
 | Save name | 0 | 1 | 16 | High |
 | Tiles | 16 | 10000 | 14 | High |
-| Shared world view state | 140000 | 1 | 7147 | High for listed fields |
+| Shared world view state | 140016 | 1 | 24 | High for listed fields |
 | Players | 140040 | 5 | 1423 | High |
 | Armies | 147190 | 500 | 725 | High |
 | Castles | 509690 | 10 | 467 | High |
@@ -22,15 +22,20 @@ Known fields:
 
 Other bytes are currently unknown/reserved (Low).
 
+Known overlay interpretation:
+- Overlay IDs `728..739` are temple/shrine tiles according to the original game data checks. The helper exposes `templeVariant` as `(overlayTileId - 728) / 2`.
+- Odd temple/shrine overlay IDs are currently exposed as `templeVisitedOrEmpty=true`, based on the game incrementing the overlay after temple entry.
+- Terrain IDs `752` and `755` are buried treasure tiles. Digging converts `752` to `0` and `755` to `4`.
+
 ### Shared world view state
 Known fields:
-- `mapWidthTiles` at +140000, length 4 (High)
-- `mapHeightTiles` at +140004, length 4 (High)
-- `mapViewLeft` at +140008, length 4 (High)
-- `mapViewTop` at +140012, length 4 (High)
-- `activeMissionIndex` at +140017, length 4 (High)
-- `turnOwnerPlayerIndex` at +147139, length 4 (High)
-- `viewedPlayerIndex` at +147143, length 4 (High)
+- `mapWidthTiles` at +140016, length 4 (High)
+- `mapHeightTiles` at +140020, length 4 (High)
+- `mapViewLeft` at +140024, length 4 (High)
+- `mapViewTop` at +140028, length 4 (High)
+- `activeMissionIndex` at +140032, length 4 (High)
+- `turnOwnerPlayerIndex` at +147155, length 4 (Medium/High)
+- `viewedPlayerIndex` at +147159, length 4 (Medium/High)
 
 ### Player (1423 bytes)
 Known fields:
@@ -73,10 +78,19 @@ Known fields:
 - `currentHealthPercent` +9 (High)
 - `fatigue` +10 (High)
 - `morale` +11 (High)
-- `stanceBits` +12 (Medium/High)
+- `stanceBits` +12, full raw byte containing experience plus other state bits (Medium/High)
+- `experienceLevel` +12, low 2 bits, values 0..3 where 3 is maximum/full experience (High for mask)
+- `experienceProgress` +12, bits 2..3, values 0..3; the game rolls this into `experienceLevel` (High for mask)
 - `stateFlags` +13 (Medium/High)
+- `lowMoraleFlag` +13, bit 2, set by low morale checks and cleared by positive morale changes (High for mask)
 - `auxRuntimeState` +18, length 4 (High for layout)
 - `stateBits2` +22, length 1 (High for layout)
+
+Observed constraints:
+- `currentHealthPercent` is clamped to `0..100`.
+- `fatigue` is clamped to `0..100`.
+- `morale` is clamped to `0..20`.
+- Unit types `31..34` are skipped by morale/fatigue adjustment helpers.
 
 Remaining bytes unknown/reserved (Low).
 
@@ -104,5 +118,17 @@ Known fields:
 - `techLevelBits` +444, low 3 bits (High)
 - `prisonerSlotsRaw` +445, length 18 (High for layout)
 - `castleFactId` +463, length 4 (High)
+
+Known `addonTypeIds`:
+- `0` Court
+- `1` Tower
+- `2` Hospital
+- `3` Barracks
+- `4` Workshop
+- `5` School
+- `6` Smiths
+- `7` Peasants
+- `8` Barracks
+- `255` Empty slot
 
 Remaining bytes unknown/reserved (Low).
