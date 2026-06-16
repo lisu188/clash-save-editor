@@ -3,6 +3,7 @@ package com.lis.clash
 import com.lis.clash.objects.Save
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.hasAnnotation
@@ -59,7 +60,13 @@ class SaveFormatParsingTest {
         assertEquals(90, unit.fatigue)
         assertEquals(4, unit.morale)
         assertEquals(0x12, unit.stanceBits)
+        assertEquals(2, unit.experienceLevel)
+        assertEquals(0, unit.experienceProgress)
         assertEquals(0x0E, unit.stateFlags)
+        assertEquals(1, unit.lowMoraleFlag)
+        assertTrue(unit.hasLowMoraleFlag())
+        assertEquals("low", unit.moraleBand())
+        assertEquals("exhausted", unit.fatigueBand())
         assertEquals(0x11223344, unit.auxRuntimeState)
         assertEquals(0x03, unit.stateBits2)
 
@@ -70,6 +77,7 @@ class SaveFormatParsingTest {
         assertEquals(3, castle.appearance)
         assertEquals(4, castle.footprintClass)
         assertEquals("CastleOne", castle.displayName)
+        assertEquals(listOf("Court", "Hospital", "Barracks"), castle.addonTypeNames())
         assertEquals(0x1D, castle.garrisonOrders().first().rawValue)
         assertEquals(5, castle.garrisonOrders().first().trainCountdown)
         assertEquals(3, castle.garrisonOrders().first().repairCountdown)
@@ -88,6 +96,66 @@ class SaveFormatParsingTest {
         assertTrue("listQueuedArmyPaths" in scriptNames)
         assertTrue("summarizeWorldViewState" in scriptNames)
         assertTrue("listUnitsWithStateFlags" in scriptNames)
+        assertTrue("summarizeUnitExperience" in scriptNames)
+        assertTrue("listShrines" in scriptNames)
+        assertTrue("listBuriedTreasure" in scriptNames)
+    }
+
+    @Test
+    fun unitExperienceLevelPreservesOtherStanceBits() {
+        val save = Save().withBytes<Save>(buildSyntheticSave().toList())
+        val unit = save.armies.single().units.single()
+
+        assertEquals(0x12, unit.stanceBits)
+        assertEquals(2, unit.experienceLevel)
+
+        unit.experienceLevel = 3
+        assertEquals(0x13, unit.stanceBits)
+        assertEquals(3, unit.experienceLevel)
+        assertEquals(0, unit.experienceProgress)
+        assertTrue(unit.hasMaximumExperience())
+
+        unit.experienceProgress = 3
+        assertEquals(0x1F, unit.stanceBits)
+        assertEquals(3, unit.experienceLevel)
+        assertEquals(3, unit.experienceProgress)
+
+        unit.experienceLevel = 0
+        assertEquals(0x1C, unit.stanceBits)
+        assertEquals(0, unit.experienceLevel)
+        assertEquals(3, unit.experienceProgress)
+    }
+
+    @Test
+    fun unitLowMoraleFlagPreservesOtherStateFlags() {
+        val save = Save().withBytes<Save>(buildSyntheticSave().toList())
+        val unit = save.armies.single().units.single()
+
+        assertEquals(0x0E, unit.stateFlags)
+        assertEquals(1, unit.lowMoraleFlag)
+
+        unit.lowMoraleFlag = 0
+        assertEquals(0x0A, unit.stateFlags)
+        assertEquals(0, unit.lowMoraleFlag)
+        assertFalse(unit.hasLowMoraleFlag())
+    }
+
+    @Test
+    fun templeOverlayHelpersIdentifyShrines() {
+        val save = Save().withBytes<Save>(buildSyntheticSave().toList())
+        val tile = save.tiles.first()
+
+        assertFalse(tile.isTemple())
+        assertEquals(null, tile.templeVariant())
+        assertEquals(null, tile.templeVisitedOrEmpty())
+
+        tile.overlayTileId = 731
+        assertTrue(tile.isTemple())
+        assertEquals(1, tile.templeVariant())
+        assertEquals(true, tile.templeVisitedOrEmpty())
+
+        tile.terrainTileId = 752
+        assertTrue(tile.isBuriedTreasure())
     }
 
     private fun buildSyntheticSave(): ByteArray {
@@ -106,14 +174,14 @@ class SaveFormatParsingTest {
         writeLittleEndian(bytes, 18, 654, 2)
         writeLittleEndian(bytes, 20, 872, 2)
 
-        writeLittleEndian(bytes, 140000, 60, 4)
-        writeLittleEndian(bytes, 140004, 40, 4)
-        writeLittleEndian(bytes, 140008, 7, 4)
-        writeLittleEndian(bytes, 140012, 9, 4)
-        writeLittleEndian(bytes, 140017, -1, 4)
+        writeLittleEndian(bytes, 140016, 60, 4)
+        writeLittleEndian(bytes, 140020, 40, 4)
+        writeLittleEndian(bytes, 140024, 7, 4)
+        writeLittleEndian(bytes, 140028, 9, 4)
+        writeLittleEndian(bytes, 140032, -1, 4)
 
-        writeLittleEndian(bytes, 147139, 2, 4)
-        writeLittleEndian(bytes, 147143, 3, 4)
+        writeLittleEndian(bytes, 147155, 2, 4)
+        writeLittleEndian(bytes, 147159, 3, 4)
 
         val playerBase = 140040
         writeLittleEndian(bytes, playerBase, 1, 4)
@@ -185,6 +253,12 @@ class SaveFormatParsingTest {
         writeLittleEndian(bytes, castleBase + 36, 0x12345678.toInt(), 4)
         writeLittleEndian(bytes, castleBase + 40, 0x01, 1)
         writeLittleEndian(bytes, castleBase + 390, 0x1D, 1)
+        repeat(12) { slotIndex ->
+            writeLittleEndian(bytes, castleBase + 402 + slotIndex, 0xFF, 1)
+        }
+        writeLittleEndian(bytes, castleBase + 402, 0, 1)
+        writeLittleEndian(bytes, castleBase + 403, 2, 1)
+        writeLittleEndian(bytes, castleBase + 404, 3, 1)
         writeLittleEndian(bytes, castleBase + 414, -1, 1)
         writeLittleEndian(bytes, castleBase + 416, 0x13, 1)
         writeLittleEndian(bytes, castleBase + 420, 0x01, 1)

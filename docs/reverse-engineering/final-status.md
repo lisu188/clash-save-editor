@@ -7,6 +7,10 @@
 - Replaced the old guessed `Unit` runtime fields with recovered `typeId`, `ownerPlayerIndex`, `currentActionPoints`, `currentHealthPercent`, `fatigue`, `morale`, `stanceBits`, and `stateFlags`.
 - Expanded `Castle` parsing to include add-on ids, construction lock, wall strength, upgrade timer, masked peasant/tax/plague fields, stored money, tech bits, and fact id.
 - Castle building bit flags exposed as: hospital, barracks, workshop, school, smiths.
+- Castle add-on slot ids now decode to recovered display names, including Court, Tower, Hospital, Barracks, Workshop, School, Smiths, and Peasants.
+- Unit experience and low-morale bits are exposed as masked fields that preserve unrelated state bits.
+- Temple/shrine overlays and buried treasure terrain ids are exposed through tile helpers and scripts.
+- Corrected shared world-view offsets to `140016..140032` and player-view fields to `147155`/`147159`.
 - Fixed-width integer fields now round-trip as little-endian values, and masked bitfields preserve unrelated bits.
 - Save exports now include recovered unit roster names and sprite folders from `clash-disassembly`.
 - Conservative field-window serialization for known fields.
