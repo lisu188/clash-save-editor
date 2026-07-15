@@ -1,6 +1,6 @@
 package com.lis.clash.objects
 
-import com.lis.clash.ClashMaskedProperty
+import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashSimpleProperty
 import com.lis.clash.RawSixByteRecord
 
@@ -23,13 +23,16 @@ class Player(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSimpleProperty(27, 4)
     var controllerMode: Int by clashProperty(0)
 
+    @ClashSimpleProperty(31, 4)
+    var aiIntelligence: Int by clashProperty(0)
+
     @ClashSimpleProperty(39, 4)
     var religionFlag: Int by clashProperty(0)
 
-    @ClashMaskedProperty(47, 1, 0x07)
+    @ClashSimpleProperty(47, 1)
     var techLevel: Int by clashProperty(0)
 
-    @ClashMaskedProperty(48, 1, 0x07)
+    @ClashSimpleProperty(48, 1)
     var lastReportedTechLevel: Int by clashProperty(0)
 
     @ClashSimpleProperty(49, 4)
@@ -44,8 +47,8 @@ class Player(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSimpleProperty(1357, 60)
     var prisonerTransferQueueRaw: List<Byte> by clashProperty(emptyList())
 
-    @ClashSimpleProperty(1419, 1)
-    var queenRelationshipState: Int by clashProperty(0)
+    @ClashSignedProperty(1419, 1)
+    var queenRelationshipState: Int by clashProperty(-1)
 
     @ClashSimpleProperty(1420, 1)
     var queenPortraitIndex: Int by clashProperty(0)

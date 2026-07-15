@@ -1,12 +1,16 @@
 package com.lis.clash.objects
 
-import com.lis.clash.*
+import com.lis.clash.ClashAggregateProperty
+import com.lis.clash.ClashSignedProperty
+import com.lis.clash.ClashSimpleProperty
+import com.lis.clash.QueuedPathWaypoint
+import com.lis.clash.readLittleEndianInt
 
 class Army(parent: ClashObject, index: Int) : ClashObject(parent, index) {
-    @ClashSimpleProperty(0, 2)
+    @ClashSignedProperty(0, 2)
     var tileRow: Int by clashProperty(0)
 
-    @ClashSimpleProperty(2, 2)
+    @ClashSignedProperty(2, 2)
     var tileColumn: Int by clashProperty(0)
 
     @ClashSimpleProperty(4, 1)

@@ -20,7 +20,7 @@ class MapRenderModelTest {
 
     @Test
     fun renderModelExtractsValidArmiesAndCastles() {
-        val save = Save().withBytes<Save>(buildSyntheticMapSave().toList())
+        val save = Save.parse(buildSyntheticMapSave())
         val selectedTileIndex = toIndex(tileRow = 12, tileColumn = 34, mapWidth = 60)
 
         val model = buildMapRenderModel(save, selectedTileIndex)
@@ -46,7 +46,7 @@ class MapRenderModelTest {
 
     @Test
     fun renderModelPreservesValidSelectionAndHandlesEmptyTiles() {
-        val save = Save().withBytes<Save>(buildSyntheticMapSave().toList())
+        val save = Save.parse(buildSyntheticMapSave())
         val selectedTileIndex = toIndex(tileRow = 3, tileColumn = 4, mapWidth = 60)
 
         val model = buildMapRenderModel(save, selectedTileIndex)
@@ -58,48 +58,68 @@ class MapRenderModelTest {
     }
 
     private fun buildSyntheticMapSave(): ByteArray {
-        val bytes = ByteArray(514360)
+        val bytes = ByteArray(SaveFormat.DAT_SIZE)
 
-        repeat(500) { armyIndex ->
-            writeLittleEndian(bytes, 147190 + armyIndex * 725 + 6, 0xFFFF, 2)
+        repeat(SaveFormat.ARMY_RECORD_COUNT) { armyIndex ->
+            repeat(10) { slotIndex ->
+                writeLittleEndian(
+                    bytes,
+                    SaveFormat.ARMY_RECORDS_FILE_OFFSET + armyIndex * SaveFormat.ARMY_RECORD_SIZE + 6 + slotIndex * 31,
+                    -1,
+                    2
+                )
+            }
         }
-        repeat(10) { castleIndex ->
-            writeLittleEndian(bytes, 509690 + castleIndex * 467 + 4, 0xFF, 1)
+        repeat(SaveFormat.BUILDING_RECORD_COUNT) { buildingIndex ->
+            val base = SaveFormat.BUILDING_RECORDS_FILE_OFFSET + buildingIndex * SaveFormat.BUILDING_RECORD_SIZE
+            writeLittleEndian(bytes, base + 4, -1, 1)
+            writeLittleEndian(bytes, base + 16, -1, 2)
+            repeat(12) { slotIndex ->
+                writeLittleEndian(bytes, base + 18 + slotIndex * 31, -1, 2)
+            }
+        }
+        repeat(SaveFormat.OCCUPANCY_RECORD_COUNT) { index ->
+            writeLittleEndian(
+                bytes,
+                SaveFormat.OCCUPANCY_RECORDS_FILE_OFFSET + index * SaveFormat.OCCUPANCY_RECORD_SIZE,
+                SaveFormat.EMPTY_OCCUPANCY,
+                2
+            )
         }
 
-        writeLittleEndian(bytes, 16, EMPTY_TILE_ID, 2)
-        writeLittleEndian(bytes, 18, EMPTY_TILE_ID, 2)
-        writeLittleEndian(bytes, 20, EMPTY_TILE_ID, 2)
-        writeLittleEndian(bytes, 140016, 60, 4)
-        writeLittleEndian(bytes, 140020, 40, 4)
+        writeLittleEndian(bytes, SaveFormat.TILE_RECORDS_FILE_OFFSET, EMPTY_TILE_ID, 2)
+        writeLittleEndian(bytes, SaveFormat.TILE_RECORDS_FILE_OFFSET + 2, EMPTY_TILE_ID, 2)
+        writeLittleEndian(bytes, SaveFormat.TILE_RECORDS_FILE_OFFSET + 4, EMPTY_TILE_ID, 2)
+        writeLittleEndian(bytes, SaveFormat.MAP_WIDTH_FILE_OFFSET, 60, 4)
+        writeLittleEndian(bytes, SaveFormat.MAP_HEIGHT_FILE_OFFSET, 40, 4)
 
-        val firstArmy = 147190
+        val firstArmy = SaveFormat.ARMY_RECORDS_FILE_OFFSET
         writeLittleEndian(bytes, firstArmy, 12, 2)
         writeLittleEndian(bytes, firstArmy + 2, 34, 2)
         writeLittleEndian(bytes, firstArmy + 4, 2, 1)
         writeLittleEndian(bytes, firstArmy + 6, 5, 2)
         writeLittleEndian(bytes, firstArmy + 720, 1, 1)
 
-        val outOfBoundsArmy = firstArmy + 725
+        val outOfBoundsArmy = firstArmy + SaveFormat.ARMY_RECORD_SIZE
         writeLittleEndian(bytes, outOfBoundsArmy, 45, 2)
         writeLittleEndian(bytes, outOfBoundsArmy + 2, 1, 2)
         writeLittleEndian(bytes, outOfBoundsArmy + 4, 3, 1)
         writeLittleEndian(bytes, outOfBoundsArmy + 6, 6, 2)
 
-        val firstCastle = 509690
+        val firstCastle = SaveFormat.BUILDING_RECORDS_FILE_OFFSET
         writeLittleEndian(bytes, firstCastle, 3, 1)
         writeLittleEndian(bytes, firstCastle + 1, 4, 1)
         writeLittleEndian(bytes, firstCastle + 2, 1, 1)
         writeLittleEndian(bytes, firstCastle + 4, 2, 1)
-        writeString(bytes, firstCastle + 5, 10, "Keep")
-        writeLittleEndian(bytes, firstCastle + 18, 0xFFFF, 2)
+        writeString(bytes, firstCastle + 5, 11, "Keep")
+        writeLittleEndian(bytes, firstCastle + 16, 0, 2)
 
-        val outOfBoundsCastle = firstCastle + 467
+        val outOfBoundsCastle = firstCastle + SaveFormat.BUILDING_RECORD_SIZE
         writeLittleEndian(bytes, outOfBoundsCastle, 99, 1)
         writeLittleEndian(bytes, outOfBoundsCastle + 1, 4, 1)
         writeLittleEndian(bytes, outOfBoundsCastle + 2, 4, 1)
         writeLittleEndian(bytes, outOfBoundsCastle + 4, 3, 1)
-        writeLittleEndian(bytes, outOfBoundsCastle + 18, 0xFFFF, 2)
+        writeLittleEndian(bytes, outOfBoundsCastle + 16, 0, 2)
 
         return bytes
     }
