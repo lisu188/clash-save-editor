@@ -1,12 +1,12 @@
 package com.lis.clash.objects
 
-import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashMaskedProperty
+import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashSimpleProperty
 
 class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSignedProperty(0, 2)
-    var typeId: Int by clashProperty(0)
+    var typeId: Int by clashProperty(-1)
 
     @ClashSimpleProperty(2, 1)
     var ownerPlayerIndex: Int by clashProperty(0)
@@ -45,7 +45,7 @@ class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     var stateBits2: Int by clashProperty(0)
 
     override fun isValid(): Boolean {
-        return typeId != -1
+        return typeId in 0..40
     }
 
     fun hasMaximumExperience(): Boolean {
@@ -86,5 +86,4 @@ class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
         const val MAX_EXPERIENCE_PROGRESS = 3
         val MORALE_FATIGUE_PROTECTED_TYPE_IDS = setOf(31, 32, 33, 34)
     }
-
 }
