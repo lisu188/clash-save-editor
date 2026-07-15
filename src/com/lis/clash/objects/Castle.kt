@@ -1,17 +1,17 @@
 package com.lis.clash.objects
 
-import com.lis.clash.ClashAggregateProperty
 import com.lis.clash.CastleAddonSlot
-import com.lis.clash.CastleAddonTypes
-import com.lis.clash.GarrisonOrder
+import com.lis.clash.ClashAggregateProperty
 import com.lis.clash.ClashMaskedProperty
-import com.lis.clash.RawSixByteRecord
 import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashSimpleProperty
+import com.lis.clash.GarrisonOrder
+import com.lis.clash.RawSixByteRecord
+import com.lis.clash.UnitLicenceSlot
+import com.lis.clash.UnitTypes
 
 class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     companion object {
-        // Derived from clash95.c / clash-disassembly building facts.
         const val BUILDING_HOSPITAL = 1
         const val BUILDING_BARRACKS = 2
         const val BUILDING_WORKSHOP = 4
@@ -32,10 +32,13 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     var appearance: Int by clashProperty(0)
 
     @ClashSignedProperty(4, 1)
-    var footprintClass: Int by clashProperty(0)
+    var footprintClass: Int by clashProperty(-1)
 
-    @ClashSimpleProperty(5, 10)
+    @ClashSimpleProperty(5, 11)
     var displayName: String by clashProperty("")
+
+    @ClashSignedProperty(16, 2)
+    var constructionTurnsRemaining: Int by clashProperty(-1)
 
     @ClashAggregateProperty(18, 12, 31, Unit::class)
     var units: List<Unit> by clashProperty(emptyList())
@@ -44,10 +47,13 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     var garrisonOrderBytes: List<Byte> by clashProperty(emptyList())
 
     @ClashSimpleProperty(402, 12)
-    var addonTypeIds: List<Byte> by clashProperty(emptyList())
+    var unitLicenceTypeIds: List<Byte> by clashProperty(emptyList())
 
     @ClashSignedProperty(414, 1)
-    var selectedAddonSlotIndex: Int by clashProperty(0)
+    var activeProductionLicenceSlotIndex: Int by clashProperty(-1)
+
+    @ClashSimpleProperty(415, 1)
+    var productionTurnsRemaining: Int by clashProperty(0)
 
     @ClashSimpleProperty(416, 1)
     var castleAddonFlags: Int by clashProperty(0)
@@ -85,8 +91,22 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSimpleProperty(463, 4)
     var castleFactId: Int by clashProperty(0)
 
+    @Deprecated("Use unitLicenceTypeIds", ReplaceWith("unitLicenceTypeIds"))
+    var addonTypeIds: List<Byte>
+        get() = unitLicenceTypeIds
+        set(value) {
+            unitLicenceTypeIds = value
+        }
+
+    @Deprecated("Use activeProductionLicenceSlotIndex", ReplaceWith("activeProductionLicenceSlotIndex"))
+    var selectedAddonSlotIndex: Int
+        get() = activeProductionLicenceSlotIndex
+        set(value) {
+            activeProductionLicenceSlotIndex = value
+        }
+
     fun hasBuilding(flag: Int): Boolean {
-        return (castleAddonFlags and flag) != 0
+        return castleAddonFlags and flag != 0
     }
 
     fun buildingNames(): List<String> {
@@ -99,21 +119,33 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
         return result
     }
 
-    fun addonSlots(): List<CastleAddonSlot> {
-        return addonTypeIds.mapIndexedNotNull { slotIndex, rawTypeId ->
+    fun unitLicenceSlots(): List<UnitLicenceSlot> {
+        return unitLicenceTypeIds.mapIndexedNotNull { slotIndex, rawTypeId ->
             val typeId = rawTypeId.toInt() and 0xFF
-            if (typeId == CastleAddonTypes.EMPTY_SLOT) {
+            if (typeId == 0xFF) {
                 null
             } else {
-                CastleAddonSlot(slotIndex, typeId, CastleAddonTypes.metadata(typeId)?.displayName)
+                UnitLicenceSlot(slotIndex, typeId, UnitTypes.metadata(typeId)?.displayName)
             }
         }
     }
 
-    fun addonTypeNames(): List<String> {
-        return addonSlots().map { slot ->
+    fun unitLicenceTypeNames(): List<String> {
+        return unitLicenceSlots().map { slot ->
             slot.displayName ?: "unknown(${slot.typeId})"
         }
+    }
+
+    @Deprecated("Use unitLicenceSlots", ReplaceWith("unitLicenceSlots()"))
+    fun addonSlots(): List<CastleAddonSlot> {
+        return unitLicenceSlots().map { slot ->
+            CastleAddonSlot(slot.slotIndex, slot.typeId, slot.displayName)
+        }
+    }
+
+    @Deprecated("Use unitLicenceTypeNames", ReplaceWith("unitLicenceTypeNames()"))
+    fun addonTypeNames(): List<String> {
+        return unitLicenceTypeNames()
     }
 
     fun garrisonOrders(): List<GarrisonOrder> {
@@ -127,6 +159,6 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     }
 
     override fun isValid(): Boolean {
-        return footprintClass != -1
+        return footprintClass in 0..3 && constructionTurnsRemaining != -1
     }
 }
