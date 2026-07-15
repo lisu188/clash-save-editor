@@ -7,6 +7,12 @@ on:
       - codex/recovered-full-save-layout
   pull_request:
 
+permissions:
+  contents: read
+  actions: read
+  issues: write
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -36,4 +42,18 @@ jobs:
       - name: Publish concise failure
         if: failure()
         shell: bash
-        run: grep -E '(^e: |^w: |FAILURE:|What went wrong|Execution failed|There were failing tests|> Task .*FAILED)' gradle-test.log | tail -n 200 || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          grep -E '(^e: |^w: |FAILURE:|What went wrong|Execution failed|There were failing tests|> Task .*FAILED|^[[:space:]]+[A-Za-z0-9_].*Test > .*FAILED)' gradle-test.log | tail -n 200 > gradle-failure-summary.log || true
+          cat gradle-failure-summary.log
+          if [ -s gradle-failure-summary.log ]; then
+            {
+              echo 'CI diagnostic for commit `${{ github.sha }}`:'
+              echo
+              echo '```text'
+              cat gradle-failure-summary.log
+              echo '```'
+            } > pr-comment.md
+            gh pr comment 13 --repo "${{ github.repository }}" --body-file pr-comment.md || true
+          fi
