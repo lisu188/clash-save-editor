@@ -10,12 +10,15 @@ class TileOccupancy(parent: ClashObject, index: Int) : ClashObject(parent, index
     fun isEmpty(): Boolean = rawValue == SaveFormat.EMPTY_OCCUPANCY
 
     fun armyStackIndex(): Int? {
-        return rawValue.takeIf { it in 0 until SaveFormat.OCCUPANCY_BUILDING_INDEX_BASE }
+        return rawValue.takeIf { it in 0 until SaveFormat.ARMY_RECORD_COUNT }
     }
 
     fun buildingIndex(): Int? {
         return rawValue
-            .takeIf { it in SaveFormat.OCCUPANCY_BUILDING_INDEX_BASE until SaveFormat.EMPTY_OCCUPANCY }
+            .takeIf {
+                it in SaveFormat.OCCUPANCY_BUILDING_INDEX_BASE until
+                    SaveFormat.OCCUPANCY_BUILDING_INDEX_BASE + SaveFormat.BUILDING_RECORD_COUNT
+            }
             ?.minus(SaveFormat.OCCUPANCY_BUILDING_INDEX_BASE)
     }
 }
