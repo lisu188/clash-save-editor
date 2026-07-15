@@ -1,59 +1,62 @@
 # Clash Save Editor
 
-This project uses Gradle with Kotlin support.
+Kotlin/JVM editor and MCP server for recovered Clash save-slot DAT files.
+
+## Supported format
+
+The editor accepts exact-size `save/N.dat` files:
+
+- 16-byte save label;
+- `0x8F29E`-byte raw `gameData` image;
+- total size `586414` bytes;
+- little-endian recovered numeric fields.
+
+A complete game save also has a matching `save/N.fac` CLIPS facts sidecar. The editor does not rewrite FAC files, so back up and move both files together.
+
+See `docs/reverse-engineering/save-format.md` for the recovered field map and unresolved regions.
 
 ## Requirements
-- **Java 9** or higher (toolchain target is 9)
-- **Kotlin 1.9.x** (handled by Gradle)
+
+- Java 17 or newer
+- Kotlin 1.9.x through Gradle
 
 ## Setup
-
-Run the helper script to fetch IntelliJ dependencies and build offline:
 
 ```bash
 ./setup.sh
 ```
 
-If the downloads are blocked, place the required files inside `local-repo`
-and rerun the script.
+If downloads are blocked, place the required files inside `local-repo` and rerun the script.
 
-## Building
-Run the following command with your system-installed Gradle:
+## Building and testing
 
 ```bash
-gradle build
+./gradlew test
+./gradlew build
 ```
 
-The build creates a fat JAR at `build/libs/clash-save-editor-all.jar` which
-includes all dependencies and the compiled GUI classes.
+The build creates `build/libs/clash-save-editor-all.jar` with the GUI classes and runtime dependencies.
 
-## Running
-
-Execute the application with:
+## Running the GUI
 
 ```bash
 java -jar build/libs/clash-save-editor-all.jar
 ```
 
-The build uses IntelliJ form instrumentation so `.form` UI files are compiled
-automatically.
+The build uses IntelliJ form instrumentation so `.form` UI files are compiled automatically.
 
 ## MCP server
 
-The project also includes a stdio MCP server for LLM-assisted inspection and
-editing of Clash save files. During development, run it with:
+During development:
 
 ```bash
 ./gradlew runMcpServer
 ```
 
-After building the fat JAR, configure an MCP client to launch:
+From the fat JAR:
 
 ```bash
 java -cp build/libs/clash-save-editor-all.jar com.lis.clash.mcp.ClashSaveMcpServerKt
 ```
 
-The server exposes tools for schema discovery, save overviews, parsed object
-reads, raw byte reads, annotated property edits, and explicit raw byte writes.
-Structured edits require `outputPath` unless `inPlace=true`; in-place writes
-create a `.bak` file by default.
+The MCP server exposes schema discovery, save overviews, parsed object navigation, occupancy and trap inspection, raw-byte reads, structured property edits, and explicit raw-byte writes. Structured edits require `outputPath` unless `inPlace=true`; in-place writes create a `.bak` file by default. MCP writes preserve the exact DAT length and do not modify the FAC sidecar.
