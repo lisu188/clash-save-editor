@@ -202,7 +202,7 @@ class Castle(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     }
 
     override fun isValid(): Boolean {
-        return buildingType != -1
+        return buildingType in 0..3 && constructionWorkRemaining != -1
     }
 }
 
