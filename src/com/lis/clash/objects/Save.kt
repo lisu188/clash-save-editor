@@ -83,10 +83,10 @@ class Save : ClashObject(null, 0) {
     @ClashSignedProperty(147189, 1)
     var musicVolumeRaw: Int by clashProperty(0)
 
-    @ClashAggregateProperty(147190, ARMY_COUNT, 725, Army::class)
+    @ClashAggregateProperty(147190, ARMY_COUNT, 725, Army::class, stopAtFirstInvalid = false)
     var armies: List<Army> by clashProperty(emptyList())
 
-    @ClashAggregateProperty(509690, BUILDING_COUNT, 467, Castle::class)
+    @ClashAggregateProperty(509690, BUILDING_COUNT, 467, Castle::class, stopAtFirstInvalid = false)
     var castles: List<Castle> by clashProperty(emptyList())
 
     @ClashSimpleProperty(556390, 20000)
