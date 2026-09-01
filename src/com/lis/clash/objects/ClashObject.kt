@@ -63,7 +63,10 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
                         bytes.slice(startIndex until endIndex)
                     )
                 if (!element.isValid()) {
-                    break;
+                    if (it.stopAtFirstInvalid()) {
+                        break
+                    }
+                    continue
                 }
                 list.add(element)
             }

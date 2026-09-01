@@ -25,7 +25,8 @@ annotation class ClashAggregateProperty(
     val index: Int,
     val count: Int,
     val size: Int,
-    val clas: KClass<out ClashObject>
+    val clas: KClass<out ClashObject>,
+    val stopAtFirstInvalid: Boolean = true
 )
 
 
@@ -183,6 +184,10 @@ class AggregatePropertyDescriptor(_property: KMutableProperty<ClashObject>) : Cl
 
     fun size(): Int {
         return annotation.size
+    }
+
+    fun stopAtFirstInvalid(): Boolean {
+        return annotation.stopAtFirstInvalid
     }
 
     fun getConstructor(): KFunction<ClashObject> {

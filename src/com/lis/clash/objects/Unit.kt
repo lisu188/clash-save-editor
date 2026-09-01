@@ -1,7 +1,7 @@
 package com.lis.clash.objects
 
-import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashMaskedProperty
+import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashSimpleProperty
 
 class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
@@ -27,16 +27,28 @@ class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     var stanceBits: Int by clashProperty(0)
 
     @ClashMaskedProperty(12, 1, 0x03)
-    var experienceLevel: Int by clashProperty(0)
+    var statusLevel: Int by clashProperty(0)
 
     @ClashMaskedProperty(12, 1, 0x03, 2)
-    var experienceProgress: Int by clashProperty(0)
+    var orderState: Int by clashProperty(0)
+
+    @ClashMaskedProperty(12, 1, 0x07, 4)
+    var volleysUsed: Int by clashProperty(0)
 
     @ClashSimpleProperty(13, 1)
     var stateFlags: Int by clashProperty(0)
 
+    @ClashMaskedProperty(13, 1, 0x01)
+    var readyForTurnFlag: Int by clashProperty(0)
+
+    @ClashMaskedProperty(13, 1, 0x01, 1)
+    var spentTurnFlag: Int by clashProperty(0)
+
     @ClashMaskedProperty(13, 1, 0x01, 2)
     var lowMoraleFlag: Int by clashProperty(0)
+
+    @ClashMaskedProperty(13, 1, 0x01, 3)
+    var plagueFlag: Int by clashProperty(0)
 
     @ClashSimpleProperty(18, 4)
     var auxRuntimeState: Int by clashProperty(0)
@@ -44,16 +56,43 @@ class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSimpleProperty(22, 1)
     var stateBits2: Int by clashProperty(0)
 
+    @Deprecated("Byte +12 bits 0..1 are a status level, not an experience level")
+    var experienceLevel: Int
+        get() = statusLevel
+        set(value) {
+            statusLevel = value
+        }
+
+    @Deprecated("Byte +12 bits 2..3 are an order state, not experience progress")
+    var experienceProgress: Int
+        get() = orderState
+        set(value) {
+            orderState = value
+        }
+
     override fun isValid(): Boolean {
-        return typeId != -1
+        return typeId in 0..40
     }
 
+    fun remainingVolleys(): Int {
+        return (statusLevel + 1 - volleysUsed).coerceAtLeast(0)
+    }
+
+    fun hasMaximumStatusLevel(): Boolean {
+        return statusLevel == MAX_STATUS_LEVEL
+    }
+
+    @Deprecated("Use hasMaximumStatusLevel")
     fun hasMaximumExperience(): Boolean {
-        return experienceLevel == MAX_EXPERIENCE_LEVEL
+        return hasMaximumStatusLevel()
     }
 
     fun hasLowMoraleFlag(): Boolean {
         return lowMoraleFlag != 0
+    }
+
+    fun hasPlagueFlag(): Boolean {
+        return plagueFlag != 0
     }
 
     fun isMoraleFatigueProtectedType(): Boolean {
@@ -82,9 +121,13 @@ class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
         const val MAX_HEALTH_PERCENT = 100
         const val MAX_FATIGUE = 100
         const val MAX_MORALE = 20
-        const val MAX_EXPERIENCE_LEVEL = 3
-        const val MAX_EXPERIENCE_PROGRESS = 3
+        const val MAX_STATUS_LEVEL = 3
+        const val MAX_ORDER_STATE = 3
+        const val MAX_VOLLEYS_USED = 7
+        @Deprecated("Use MAX_STATUS_LEVEL")
+        const val MAX_EXPERIENCE_LEVEL = MAX_STATUS_LEVEL
+        @Deprecated("Use MAX_ORDER_STATE")
+        const val MAX_EXPERIENCE_PROGRESS = MAX_ORDER_STATE
         val MORALE_FATIGUE_PROTECTED_TYPE_IDS = setOf(31, 32, 33, 34)
     }
-
 }

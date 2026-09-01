@@ -58,12 +58,12 @@ class MapRenderModelTest {
     }
 
     private fun buildSyntheticMapSave(): ByteArray {
-        val bytes = ByteArray(514360)
+        val bytes = ByteArray(Save.EXPECTED_FILE_SIZE)
 
-        repeat(500) { armyIndex ->
+        repeat(Save.ARMY_COUNT) { armyIndex ->
             writeLittleEndian(bytes, 147190 + armyIndex * 725 + 6, 0xFFFF, 2)
         }
-        repeat(10) { castleIndex ->
+        repeat(Save.BUILDING_COUNT) { castleIndex ->
             writeLittleEndian(bytes, 509690 + castleIndex * 467 + 4, 0xFF, 1)
         }
 
@@ -91,7 +91,7 @@ class MapRenderModelTest {
         writeLittleEndian(bytes, firstCastle + 1, 4, 1)
         writeLittleEndian(bytes, firstCastle + 2, 1, 1)
         writeLittleEndian(bytes, firstCastle + 4, 2, 1)
-        writeString(bytes, firstCastle + 5, 10, "Keep")
+        writeString(bytes, firstCastle + 5, 11, "Keep")
         writeLittleEndian(bytes, firstCastle + 18, 0xFFFF, 2)
 
         val outOfBoundsCastle = firstCastle + 467

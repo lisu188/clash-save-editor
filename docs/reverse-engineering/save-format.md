@@ -1,134 +1,242 @@
-# Save format (consolidated)
+# Save format
+
+This document describes Clash `save/N.dat` files. Offsets in this repository are absolute file offsets. The original game stores a 16-byte save label followed by a byte-for-byte image of the 586,398-byte `gameData` allocation.
 
 ## Top-level file layout
-| Section | Offset | Count | Entry size | Confidence |
+
+| Section | File offset | Size | Count / stride | Confidence |
 |---|---:|---:|---:|---|
-| Save name | 0 | 1 | 16 | High |
-| Tiles | 16 | 10000 | 14 | High |
-| Shared world view state | 140016 | 1 | 24 | High for listed fields |
-| Players | 140040 | 5 | 1423 | High |
-| Armies | 147190 | 500 | 725 | High |
-| Castles | 509690 | 10 | 467 | High |
+| Save label | 0 | 16 | 1 | High |
+| Map tile records | 16 | 140000 | 10000 × 14 | High |
+| World/session header | 140016 | 24 | 1 | High |
+| Player runtime records | 140040 | 7115 | 5 × 1423 | High |
+| Turn/viewed-player indices | 147155 | 8 | 2 × 4 | High |
+| Persistent options record | 147163 | 27 | 6 dwords + 3 bytes | High for layout |
+| Army stack records | 147190 | 362500 | 500 × 725 | High |
+| Building records | 509690 | 46700 | 100 × 467 | High |
+| Occupancy index layer | 556390 | 20000 | 10000 × uint16 | High |
+| Trap owner-mask layer | 576390 | 10000 | 10000 × uint8 | High |
+| Port runtime state | 586390 | 24 | 6 × int32 | High |
 
-Minimum represented file size: `514360` bytes.
+Expected DAT size: **586,414 bytes** (`16 + 586398`).
 
-## Structure summaries
+For comparison with `clash-disassembly`, which usually uses offsets relative to `gameData`:
 
-### Tile (14 bytes)
-Known fields:
-- `terrainTileId` at +0, length 2 (High)
-- `overlayTileId` at +2, length 2 (High)
-- `roadOrBridgeTileId` at +4, length 2 (High)
+```text
+file offset = gameData offset + 16
+```
 
-Other bytes are currently unknown/reserved (Low).
+## World/session header
 
-Known overlay interpretation:
-- Overlay IDs `728..739` are temple/shrine tiles according to the original game data checks. The helper exposes `templeVariant` as `(overlayTileId - 728) / 2`.
-- Odd temple/shrine overlay IDs are currently exposed as `templeVisitedOrEmpty=true`, based on the game incrementing the overlay after temple entry.
-- Terrain IDs `752` and `755` are buried treasure tiles. Digging converts `752` to `0` and `755` to `4`.
+| File offset | Size | Field |
+|---:|---:|---|
+| 140016 | 4 | `mapWidthTiles` |
+| 140020 | 4 | `mapHeightTiles` |
+| 140024 | 4 | `mapViewLeft` |
+| 140028 | 4 | `mapViewTop` |
+| 140032 | 1 | `mapThemeId` |
+| 140033 | 4 | `activeMissionIndex` |
+| 140037 | 1 | `missionFailureFlag` |
+| 140038 | 2 | `turnCounter` |
 
-### Shared world view state
-Known fields:
-- `mapWidthTiles` at +140016, length 4 (High)
-- `mapHeightTiles` at +140020, length 4 (High)
-- `mapViewLeft` at +140024, length 4 (High)
-- `mapViewTop` at +140028, length 4 (High)
-- `activeMissionIndex` at +140032, length 4 (High)
-- `turnOwnerPlayerIndex` at +147155, length 4 (Medium/High)
-- `viewedPlayerIndex` at +147159, length 4 (Medium/High)
+The old editor incorrectly treated bytes `140032..140035` as a four-byte mission id. The mission id actually begins one byte later; byte `140032` is the map/theme selector.
 
-### Player (1423 bytes)
-Known fields:
-- `isActive` at +0, length 4 (High)
-- `displayName` at +4, length 11 (High)
-- `cameraLeft` at +15, length 4 (High)
-- `cameraTop` at +19, length 4 (High)
-- `minimapVisibleFlag` at +23, length 4 (High)
-- `controllerMode` at +27, length 4 (High)
-- `religionFlag` at +39, length 4 (High)
-- `techLevel` at +47, low 3 bits (High)
-- `lastReportedTechLevel` at +48, low 3 bits (High)
-- `battleActionTakenFlag` at +49, length 4 (High)
-- `consecutiveIdleBattleTurns` at +53, length 4 (High)
-- `revealedTilesBitset` at +57, length 1300 (High)
-- `prisonerTransferQueueRaw` at +1357, length 60 (High for layout)
-- `queenRelationshipState` at +1419, length 1 (High)
-- `queenPortraitIndex` at +1420, length 1 (High)
-- `queenNextRelationshipCheckTurn` at +1421, length 2 (High)
+## Persistent options record
 
-Other bytes unknown/reserved (Low).
+The game copies 24 bytes of its options record into `gameData`, followed by three slider bytes. Campaign transitions preserve all 27 bytes.
 
-### Army (725 bytes)
-Known fields:
-- `tileRow` +0, length 2 (High)
-- `tileColumn` +2, length 2 (High)
-- `ownerPlayerIndex` +4, length 1 (High)
-- `facingDirection` +5, length 1 (High)
-- `units` +6, count 10, entry size 31 (High for layout)
-- `queuedPathWaypointCount` +316, length 4 (High)
-- `isHiddenOnWorldMap` +720, length 1 (High)
+| File offset | Size | Meaning |
+|---:|---:|---|
+| 147163 | 4 | transition/event animation enable flag |
+| 147167 | 4 | map grid overlay flag |
+| 147171 | 4 | map information/status overlay flag |
+| 147175 | 4 | fast/skip movement animation flag |
+| 147179 | 4 | music enabled flag |
+| 147183 | 4 | sound effects enabled flag |
+| 147187 | 1 | scroll-speed raw value |
+| 147188 | 1 | sound-volume raw value |
+| 147189 | 1 | music/brightness-style signed raw value used by the original options code |
 
-Remaining bytes unknown/reserved (Low).
+The first four dwords are boolean-style runtime controls. Their names remain intentionally close to observed behavior rather than UI-label speculation.
 
-### Unit (31 bytes)
-Known fields:
-- `typeId` +0, length 2 (High for occupancy marker, `-1` empty)
-- `ownerPlayerIndex` +2 (High)
-- `currentActionPoints` +8 (High)
-- `currentHealthPercent` +9 (High)
-- `fatigue` +10 (High)
-- `morale` +11 (High)
-- `stanceBits` +12, full raw byte containing experience plus other state bits (Medium/High)
-- `experienceLevel` +12, low 2 bits, values 0..3 where 3 is maximum/full experience (High for mask)
-- `experienceProgress` +12, bits 2..3, values 0..3; the game rolls this into `experienceLevel` (High for mask)
-- `stateFlags` +13 (Medium/High)
-- `lowMoraleFlag` +13, bit 2, set by low morale checks and cleared by positive morale changes (High for mask)
-- `auxRuntimeState` +18, length 4 (High for layout)
-- `stateBits2` +22, length 1 (High for layout)
+## Player record — 1423 bytes
 
-Observed constraints:
-- `currentHealthPercent` is clamped to `0..100`.
-- `fatigue` is clamped to `0..100`.
-- `morale` is clamped to `0..20`.
-- Unit types `31..34` are skipped by morale/fatigue adjustment helpers.
+Player records begin at file offset `140040`.
 
-Remaining bytes unknown/reserved (Low).
+Known fields include:
 
-### Castle (467 bytes)
-Known fields:
-- `tileRow` +0 (High)
-- `tileColumn` +1 (High)
-- `ownerPlayerIndex` +2 (High)
-- `appearance` +3 (Low/Medium)
-- `footprintClass` +4 (High for occupancy marker)
-- `displayName` +5, length 10 (High)
-- `units` +18, count 12, entry size 31 (High for layout)
-- `garrisonOrderBytes` +390, length 12 (High for layout)
-- `addonTypeIds` +402, length 12 (High)
-- `selectedAddonSlotIndex` +414 (High)
-- `castleAddonFlags` +416 (High)
-- `constructionLockFlags` +420 (High)
-- `wallStrength` +421 (High)
-- `upgradeTimerTurns` +429 (High)
-- `peasantCount` +430, low 12 bits (High)
-- `satisfaction` +434 (High)
-- `plagueState` +435, low 3 bits (High)
-- `taxRate` +436, low 6 bits (High)
-- `storedMoney` +438, length 4 (High)
-- `techLevelBits` +444, low 3 bits (High)
-- `prisonerSlotsRaw` +445, length 18 (High for layout)
-- `castleFactId` +463, length 4 (High)
+- `+0` `isActive`, int32.
+- `+4` `displayName`, 11 bytes.
+- `+15` `cameraLeft`, int32.
+- `+19` `cameraTop`, int32.
+- `+23` `minimapVisibleFlag`, int32.
+- `+27` `controllerMode`, int32.
+- `+31` AI intelligence, int32; currently not exposed by the editor model.
+- `+39` `religionFlag`, int32.
+- `+47` `techLevel`, uint8.
+- `+48` `lastReportedTechLevel`, uint8.
+- `+49` `battleActionTakenFlag`, int32.
+- `+53` `consecutiveIdleBattleTurns`, int32.
+- `+57` `revealedTilesBitset`, 1300 bytes.
+- `+1357` prisoner transfer queue, ten six-byte entries.
+- `+1419` `queenRelationshipState`, byte.
+- `+1420` `queenPortraitIndex`, byte.
+- `+1421` `queenNextRelationshipCheckTurn`, uint16.
 
-Known `addonTypeIds`:
-- `0` Court
-- `1` Tower
-- `2` Hospital
-- `3` Barracks
-- `4` Workshop
-- `5` School
-- `6` Smiths
-- `7` Peasants
-- `8` Barracks
-- `255` Empty slot
+## Army stack — 725 bytes
 
-Remaining bytes unknown/reserved (Low).
+500 records begin at file offset `147190`.
+
+| Relative offset | Size | Field |
+|---:|---:|---|
+| 0 | 2 | signed tile row |
+| 2 | 2 | signed tile column |
+| 4 | 1 | owner player index |
+| 5 | 1 | facing direction |
+| 6 | 310 | ten 31-byte unit slots |
+| 316 | 404 | queued path buffer |
+| 720 | 1 | hidden-on-world-map flag |
+| 721 | 4 | cached CLIPS/rules army-fact handle |
+
+The `+721` dword is not padding. `Rules_CreateArmyFact` stores the asserted fact handle there and later synchronization code reuses it.
+
+### Queued path
+
+- `+316` int32 waypoint count.
+- `+320` up to 100 four-byte waypoints.
+- Each waypoint is `row:uint8`, `column:uint8`, `cumulativeCost:uint16`.
+
+## Unit slot — 31 bytes
+
+| Relative offset | Field |
+|---:|---|
+| 0 | signed unit type id; `-1` means empty |
+| 2 | owner player index |
+| 8 | current action points |
+| 9 | current health percentage |
+| 10 | fatigue |
+| 11 | morale |
+| 12 | packed status/order/ranged-fire byte |
+| 13 | packed state flags |
+| 18 | auxiliary runtime dword |
+| 22 | secondary state bits |
+
+Byte `+12` is **not an experience byte**:
+
+- bits `0..1`: `statusLevel`;
+- bits `2..3`: `orderState`;
+- bits `4..6`: `volleysUsed`;
+- bit `7`: unresolved.
+
+The game derives remaining ranged volleys as approximately `statusLevel + 1 - volleysUsed`.
+
+Known byte `+13` flags:
+
+- bit `0x01`: ready/active turn-state flag;
+- bit `0x02`: spent-turn flag, which prevents fatigue recovery;
+- bit `0x04`: low-morale refusal flag;
+- bit `0x08`: plague flag;
+- upper bits remain unresolved.
+
+The editor preserves unrelated packed bits when changing any masked field.
+
+## Building record — 467 bytes
+
+100 records begin at file offset `509690`. An unused record has signed building type `-1` at `+4`; destruction also uses `constructionWorkRemaining = -1` at `+16`.
+
+| Relative offset | Size | Field |
+|---:|---:|---|
+| 0 | 1 | tile row |
+| 1 | 1 | tile column |
+| 2 | 1 | owner player index |
+| 3 | 1 | appearance/visual variant |
+| 4 | 1 | signed building type |
+| 5 | 11 | display name |
+| 16 | 2 | signed construction work remaining; `0` completed, `-1` unused/destroyed |
+| 18 | 372 | twelve 31-byte garrison unit slots |
+| 390 | 12 | packed garrison service state |
+| 402 | 12 | unit-production licence type ids (`-1` empty) |
+| 414 | 1 | signed active production licence slot index |
+| 415 | 1 | production turns remaining |
+| 416 | 1 | castle add-on flags |
+| 420 | 1 | staged-construction lock flags |
+| 421 | 1 | wall strength |
+| 422 | 7 | wall/building section integrity bytes |
+| 429 | 1 | staged upgrade timer |
+| 430 | 2 | peasant count in low 12 bits |
+| 432 | 2 | signed 12-bit population-growth delta plus unrelated high nibble |
+| 434 | 1 | signed satisfaction value |
+| 435 | 1 | plague state in low 3 bits |
+| 436 | 1 | tax rate in low 6 bits |
+| 437 | 1 | unresolved packed byte; default low-six-bit value is often 50 |
+| 438 | 4 | stored money |
+| 442 | 2 | last collected gold income |
+| 444 | 1 | technology level in low 3 bits |
+| 445 | 18 | three six-byte prisoner slots |
+| 463 | 4 | cached CLIPS/rules castle-fact handle |
+
+### Garrison service state
+
+Each byte at `+390..+401` contains two independent countdowns:
+
+- bits `0..2`: training turns remaining;
+- bits `3..5`: repair turns remaining;
+- bits `6..7`: unresolved.
+
+### Production licences
+
+Bytes `+402..+413` are **unit type ids**, not castle add-on ids. New buildings seed a peasant licence and use `-1` for empty slots. Actual permanent castle add-ons are the separate flags at `+416`:
+
+- `0x01` hospital;
+- `0x02` barracks;
+- `0x04` workshop;
+- `0x08` school;
+- `0x10` smiths.
+
+### Prisoner slot — 6 bytes
+
+Each of the three records at `+445` contains:
+
+| Relative offset | Size | Field |
+|---:|---:|---|
+| 0 | 1 | signed prisoner type id |
+| 1 | 1 | captured owner player index |
+| 2 | 1 | turns held |
+| 3 | 1 | pending action |
+| 4 | 2 | ransom value |
+
+## Occupancy index layer
+
+The 20,000-byte region at file offset `556390` is 10,000 little-endian uint16 cells, one per logical 100×100 map tile.
+
+Known encoding:
+
+- `0xFFFF`: empty;
+- `0..499`: army stack index;
+- `0x8000..0x8063`: building index `value - 0x8000`.
+
+This layer should be used to cross-check object locations after edits. It is independent from the 14-byte visual terrain records.
+
+## Trap owner-mask layer
+
+File offset `576390`, 10,000 bytes. Each byte is a player bitmask associated with the tile's trap state/knowledge. Trap creation sets a player bit; triggering/clearing a trap clears the corresponding byte.
+
+## Port runtime state
+
+Six signed/unsigned runtime dwords at file offset `586390`:
+
+- `+0` port row (`-1` = no port);
+- `+4` port column;
+- `+8` next reinforcement turn;
+- `+12` reinforcement-ready flag;
+- `+16` pending reinforcement unit count;
+- `+20` shoreline visual-variant flag.
+
+## Editing rules
+
+1. Preserve every byte not explicitly changed.
+2. Preserve unrelated bits in packed bytes/words.
+3. Do not reinterpret runtime fact handles as portable identifiers; the original loader rebuilds rule facts.
+4. Do not resize a save: valid DAT files are exactly 586,414 bytes.
+5. A field name is promoted only when source behavior or reproducible save diffs support it.
+6. Treat `clash-disassembly` as the authoritative source when this editor's historical names conflict with recovered executable behavior.
