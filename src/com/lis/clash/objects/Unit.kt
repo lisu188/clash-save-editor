@@ -71,7 +71,7 @@ class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
         }
 
     override fun isValid(): Boolean {
-        return typeId != -1
+        return typeId in 0..40
     }
 
     fun remainingVolleys(): Int {
