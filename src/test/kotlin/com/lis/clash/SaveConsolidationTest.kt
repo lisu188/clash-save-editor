@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class SaveConsolidationTest {
-    private val saveSize = 514360
+    private val saveSize = Save.EXPECTED_FILE_SIZE
     private val firstCastleOffset = 509690
     private val firstPlayerOffset = 140040
 
@@ -27,8 +27,7 @@ class SaveConsolidationTest {
         assertEquals('A'.code.toByte(), edited[firstCastleOffset + 5])
         assertEquals('B'.code.toByte(), edited[firstCastleOffset + 6])
 
-        // Remaining bytes in the fixed-width field should be zero padded.
-        for (i in 7..14) {
+        for (i in 7..15) {
             assertEquals(0.toByte(), edited[firstCastleOffset + i])
         }
     }
