@@ -240,7 +240,7 @@ class SaveMcpToolsTest {
         writeLittleEndian(bytes, castleBase, 44, 1)
         writeLittleEndian(bytes, castleBase + 1, 55, 1)
         writeLittleEndian(bytes, castleBase + 2, 2, 1)
-        writeLittleEndian(bytes, castleBase + 4, 4, 1)
+        writeLittleEndian(bytes, castleBase + 4, 2, 1)
         writeString(bytes, castleBase + 5, 11, "CastleOne")
         repeat(12) { slotIndex ->
             writeLittleEndian(bytes, castleBase + 402 + slotIndex, 0xFF, 1)
