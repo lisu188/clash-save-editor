@@ -26,16 +26,21 @@ class SaveMcpToolsTest {
         val unitTypes = unitSchemaContent["types"].asMap()
         val unitType = unitTypes["unit"].asMap()
         val unitProperties = unitType["simpleProperties"].asList().map { it.asMap() }
-        val experience = unitProperties.single { it["name"] == "experienceLevel" }
-        assertEquals(12, experience["offset"])
-        assertEquals("maskedLittleEndian", experience["encoding"])
-        assertEquals(0x03, experience["mask"])
-        assertEquals(3, experience["maximum"])
+        val statusLevel = unitProperties.single { it["name"] == "statusLevel" }
+        assertEquals(12, statusLevel["offset"])
+        assertEquals("maskedLittleEndian", statusLevel["encoding"])
+        assertEquals(0x03, statusLevel["mask"])
+        assertEquals(3, statusLevel["maximum"])
 
-        val progress = unitProperties.single { it["name"] == "experienceProgress" }
-        assertEquals(12, progress["offset"])
-        assertEquals(2, progress["shift"])
-        assertEquals(3, progress["maximum"])
+        val orderState = unitProperties.single { it["name"] == "orderState" }
+        assertEquals(12, orderState["offset"])
+        assertEquals(2, orderState["shift"])
+        assertEquals(3, orderState["maximum"])
+
+        val volleysUsed = unitProperties.single { it["name"] == "volleysUsed" }
+        assertEquals(12, volleysUsed["offset"])
+        assertEquals(4, volleysUsed["shift"])
+        assertEquals(7, volleysUsed["maximum"])
 
         val objectRead = tools.call(
             "save_read_object",
@@ -89,9 +94,9 @@ class SaveMcpToolsTest {
     }
 
     @Test
-    fun `experience property edits preserve other unit byte bits`() {
+    fun `status level edits preserve other unit byte bits`() {
         val input = writeSyntheticSave()
-        val output = File(input.parentFile, "experienced.dat")
+        val output = File(input.parentFile, "status.dat")
         val tools = SaveMcpTools()
 
         val result = tools.call(
@@ -99,7 +104,7 @@ class SaveMcpToolsTest {
             mapOf(
                 "path" to input.absolutePath,
                 "objectPath" to "armies[0].units[0]",
-                "property" to "experienceLevel",
+                "property" to "statusLevel",
                 "value" to 3,
                 "outputPath" to output.absolutePath
             )
@@ -109,9 +114,9 @@ class SaveMcpToolsTest {
         val originalUnit = Save().withBytes<Save>(input.readBytes().toList()).armies.first().units.first()
         val editedUnit = Save().withBytes<Save>(output.readBytes().toList()).armies.first().units.first()
         assertEquals(0x12, originalUnit.stanceBits)
-        assertEquals(2, originalUnit.experienceLevel)
+        assertEquals(2, originalUnit.statusLevel)
         assertEquals(0x13, editedUnit.stanceBits)
-        assertEquals(3, editedUnit.experienceLevel)
+        assertEquals(3, editedUnit.statusLevel)
 
         val content = result.structuredContent.asMap()
         assertEquals(2, content["before"])
@@ -120,9 +125,9 @@ class SaveMcpToolsTest {
     }
 
     @Test
-    fun `experience progress edits preserve experience tier`() {
+    fun `order state edits preserve status tier`() {
         val input = writeSyntheticSave()
-        val output = File(input.parentFile, "progress.dat")
+        val output = File(input.parentFile, "order.dat")
         val tools = SaveMcpTools()
 
         val result = tools.call(
@@ -130,7 +135,7 @@ class SaveMcpToolsTest {
             mapOf(
                 "path" to input.absolutePath,
                 "objectPath" to "armies[0].units[0]",
-                "property" to "experienceProgress",
+                "property" to "orderState",
                 "value" to 3,
                 "outputPath" to output.absolutePath
             )
@@ -138,8 +143,8 @@ class SaveMcpToolsTest {
 
         assertFalse(result.isError)
         val editedUnit = Save().withBytes<Save>(output.readBytes().toList()).armies.first().units.first()
-        assertEquals(2, editedUnit.experienceLevel)
-        assertEquals(3, editedUnit.experienceProgress)
+        assertEquals(2, editedUnit.statusLevel)
+        assertEquals(3, editedUnit.orderState)
         assertEquals(0x1E, editedUnit.stanceBits)
     }
 
@@ -195,12 +200,12 @@ class SaveMcpToolsTest {
     }
 
     private fun buildSyntheticSave(): ByteArray {
-        val bytes = ByteArray(MINIMUM_REPRESENTED_SAVE_SIZE)
+        val bytes = ByteArray(Save.EXPECTED_FILE_SIZE)
 
-        repeat(500) { armyIndex ->
+        repeat(Save.ARMY_COUNT) { armyIndex ->
             writeLittleEndian(bytes, 147190 + armyIndex * 725 + 6, 0xFFFF, 2)
         }
-        repeat(10) { castleIndex ->
+        repeat(Save.BUILDING_COUNT) { castleIndex ->
             writeLittleEndian(bytes, 509690 + castleIndex * 467 + 4, 0xFF, 1)
             repeat(12) { slotIndex ->
                 writeLittleEndian(bytes, 509690 + castleIndex * 467 + 18 + slotIndex * 31, 0xFFFF, 2)
@@ -235,8 +240,8 @@ class SaveMcpToolsTest {
         writeLittleEndian(bytes, castleBase, 44, 1)
         writeLittleEndian(bytes, castleBase + 1, 55, 1)
         writeLittleEndian(bytes, castleBase + 2, 2, 1)
-        writeLittleEndian(bytes, castleBase + 4, 4, 1)
-        writeString(bytes, castleBase + 5, 10, "CastleOne")
+        writeLittleEndian(bytes, castleBase + 4, 2, 1)
+        writeString(bytes, castleBase + 5, 11, "CastleOne")
         repeat(12) { slotIndex ->
             writeLittleEndian(bytes, castleBase + 402 + slotIndex, 0xFF, 1)
         }
