@@ -13,9 +13,8 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.hasAnnotation
 
-
 private fun parseFile(readBytes: ByteArray): Save {
-    return Save().withBytes(readBytes.toList())
+    return Save.parse(readBytes)
 }
 
 class ClashSaveEditor(title: String) : JFrame() {
@@ -29,7 +28,6 @@ class ClashSaveEditor(title: String) : JFrame() {
     init {
         createUI(title)
     }
-
 
     private fun createLayout(vararg arg: JComponent) {
         val gl = GroupLayout(contentPane)
@@ -114,7 +112,6 @@ class ClashSaveEditor(title: String) : JFrame() {
         }
     }
 
-
     private fun withFile(pathName: String, function: (file: File) -> Unit) {
         val fc = JFileChooser()
         fc.currentDirectory = File(pathName)
@@ -130,7 +127,6 @@ class ClashSaveEditor(title: String) : JFrame() {
         )
             .withSelectionController(selectionController)
     }
-
 
     private fun initializeMap() {
         clashGUI.mapPanelView().tiles = { save.tiles }
@@ -208,7 +204,6 @@ private fun ClashGUI.castlesTableView(): ClashTable = castlesTable as ClashTable
 private fun ClashGUI.castleUnitTableView(): ClashTable = castleUnitTable as ClashTable
 
 private fun ClashGUI.bytesTableView(): BytesTable = bytesTable as BytesTable
-
 
 private fun createAndShowGUI() {
     val frame = ClashSaveEditor("Clash Save Editor")

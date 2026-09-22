@@ -7,7 +7,7 @@ import kotlin.properties.ReadWriteProperty
 open class ClashObject(val parent: ClashObject?, val index: Int) {
 
     open fun isValid(): Boolean {
-        return true;
+        return true
     }
 
     internal var bytes: List<Byte> by Delegates.observable(
@@ -17,7 +17,6 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
                 onBytesChanged()
             }
         })
-
 
     fun <T> clashProperty(
         initialValue: T
@@ -62,13 +61,9 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
                     .withBytes<ClashObject>(
                         bytes.slice(startIndex until endIndex)
                     )
-                if (!element.isValid()) {
-                    if (it.stopAtFirstInvalid()) {
-                        break
-                    }
-                    continue
+                if (element.isValid()) {
+                    list.add(element)
                 }
-                list.add(element)
             }
             it.set(this, list)
         }
@@ -92,6 +87,6 @@ open class ClashObject(val parent: ClashObject?, val index: Int) {
     }
 
     fun changeByte(index: Int, byte: Byte) {
-        refreshBytes(index, listOf(byte));
+        refreshBytes(index, listOf(byte))
     }
 }

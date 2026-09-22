@@ -3,144 +3,112 @@ package com.lis.clash.objects
 import com.lis.clash.ClashAggregateProperty
 import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashSimpleProperty
-import com.lis.clash.readLittleEndianInt
+import com.lis.clash.SaveFormat
 
 class Save : ClashObject(null, 0) {
-    companion object {
-        const val FILE_HEADER_SIZE = 16
-        const val GAME_DATA_SIZE = 586398
-        const val EXPECTED_FILE_SIZE = FILE_HEADER_SIZE + GAME_DATA_SIZE
-        const val MAP_TILE_COUNT = 10000
-        const val ARMY_COUNT = 500
-        const val BUILDING_COUNT = 100
-        const val OCCUPANCY_EMPTY = 0xFFFF
-        const val OCCUPANCY_BUILDING_BASE = 0x8000
-    }
-
-    @ClashSimpleProperty(0, 16)
+    @ClashSimpleProperty(0, SaveFormat.LABEL_SIZE)
     var name: String by clashProperty("")
 
-    @ClashAggregateProperty(16, MAP_TILE_COUNT, 14, Tile::class)
+    @ClashAggregateProperty(
+        SaveFormat.TILE_RECORDS_FILE_OFFSET,
+        SaveFormat.TILE_RECORD_COUNT,
+        SaveFormat.TILE_RECORD_SIZE,
+        Tile::class
+    )
     var tiles: List<Tile> by clashProperty(emptyList())
 
-    @ClashSimpleProperty(140016, 4)
+    @ClashSimpleProperty(SaveFormat.MAP_WIDTH_FILE_OFFSET, 4)
     var mapWidthTiles: Int by clashProperty(0)
 
-    @ClashSimpleProperty(140020, 4)
+    @ClashSimpleProperty(SaveFormat.MAP_HEIGHT_FILE_OFFSET, 4)
     var mapHeightTiles: Int by clashProperty(0)
 
-    @ClashSimpleProperty(140024, 4)
+    @ClashSimpleProperty(SaveFormat.MAP_VIEW_LEFT_FILE_OFFSET, 4)
     var mapViewLeft: Int by clashProperty(0)
 
-    @ClashSimpleProperty(140028, 4)
+    @ClashSimpleProperty(SaveFormat.MAP_VIEW_TOP_FILE_OFFSET, 4)
     var mapViewTop: Int by clashProperty(0)
 
-    @ClashSimpleProperty(140032, 1)
-    var mapThemeId: Int by clashProperty(0)
+    @ClashSimpleProperty(SaveFormat.MAP_THEME_FILE_OFFSET, 1)
+    var mapThemeIndex: Int by clashProperty(0)
 
-    @ClashSignedProperty(140033, 4)
-    var activeMissionIndex: Int by clashProperty(0)
+    @ClashSignedProperty(SaveFormat.ACTIVE_MISSION_FILE_OFFSET, 4)
+    var activeMissionIndex: Int by clashProperty(-1)
 
-    @ClashSimpleProperty(140037, 1)
+    @ClashSimpleProperty(SaveFormat.MISSION_FAILURE_FILE_OFFSET, 1)
     var missionFailureFlag: Int by clashProperty(0)
 
-    @ClashSimpleProperty(140038, 2)
-    var turnCounter: Int by clashProperty(0)
+    @ClashSimpleProperty(SaveFormat.GAME_TURN_COUNTER_FILE_OFFSET, 2)
+    var gameTurnCounter: Int by clashProperty(0)
 
-    @ClashAggregateProperty(140040, 5, 1423, Player::class)
+    @ClashAggregateProperty(
+        SaveFormat.PLAYER_RECORDS_FILE_OFFSET,
+        SaveFormat.PLAYER_RECORD_COUNT,
+        SaveFormat.PLAYER_RECORD_SIZE,
+        Player::class
+    )
     var players: List<Player> by clashProperty(emptyList())
 
-    @ClashSimpleProperty(147155, 4)
+    @ClashSimpleProperty(SaveFormat.TURN_OWNER_FILE_OFFSET, 4)
     var turnOwnerPlayerIndex: Int by clashProperty(0)
 
-    @ClashSimpleProperty(147159, 4)
+    @ClashSimpleProperty(SaveFormat.VIEWED_PLAYER_FILE_OFFSET, 4)
     var viewedPlayerIndex: Int by clashProperty(0)
 
-    @ClashSimpleProperty(147163, 4)
-    var transitionAnimationsEnabled: Int by clashProperty(0)
-
-    @ClashSimpleProperty(147167, 4)
-    var gridOverlayEnabled: Int by clashProperty(0)
-
-    @ClashSimpleProperty(147171, 4)
-    var statusOverlayEnabled: Int by clashProperty(0)
-
-    @ClashSimpleProperty(147175, 4)
-    var fastMovementAnimationsEnabled: Int by clashProperty(0)
-
-    @ClashSimpleProperty(147179, 4)
-    var musicEnabled: Int by clashProperty(0)
-
-    @ClashSimpleProperty(147183, 4)
-    var soundEffectsEnabled: Int by clashProperty(0)
-
-    @ClashSimpleProperty(147187, 1)
-    var scrollSpeedRaw: Int by clashProperty(0)
-
-    @ClashSimpleProperty(147188, 1)
-    var soundVolumeRaw: Int by clashProperty(0)
-
-    @ClashSignedProperty(147189, 1)
-    var musicVolumeRaw: Int by clashProperty(0)
-
-    @ClashAggregateProperty(147190, ARMY_COUNT, 725, Army::class, stopAtFirstInvalid = false)
+    @ClashAggregateProperty(
+        SaveFormat.ARMY_RECORDS_FILE_OFFSET,
+        SaveFormat.ARMY_RECORD_COUNT,
+        SaveFormat.ARMY_RECORD_SIZE,
+        Army::class
+    )
     var armies: List<Army> by clashProperty(emptyList())
 
-    @ClashAggregateProperty(509690, BUILDING_COUNT, 467, Castle::class, stopAtFirstInvalid = false)
+    @ClashAggregateProperty(
+        SaveFormat.BUILDING_RECORDS_FILE_OFFSET,
+        SaveFormat.BUILDING_RECORD_COUNT,
+        SaveFormat.BUILDING_RECORD_SIZE,
+        Castle::class
+    )
     var castles: List<Castle> by clashProperty(emptyList())
 
-    @ClashSimpleProperty(556390, 20000)
-    var occupancyLayerRaw: List<Byte> by clashProperty(emptyList())
+    @ClashAggregateProperty(
+        SaveFormat.OCCUPANCY_RECORDS_FILE_OFFSET,
+        SaveFormat.OCCUPANCY_RECORD_COUNT,
+        SaveFormat.OCCUPANCY_RECORD_SIZE,
+        TileOccupancy::class
+    )
+    var tileOccupancy: List<TileOccupancy> by clashProperty(emptyList())
 
-    @ClashSimpleProperty(576390, 10000)
-    var trapOwnerMaskLayer: List<Byte> by clashProperty(emptyList())
+    @ClashAggregateProperty(
+        SaveFormat.TRAP_MASK_RECORDS_FILE_OFFSET,
+        SaveFormat.TRAP_MASK_RECORD_COUNT,
+        SaveFormat.TRAP_MASK_RECORD_SIZE,
+        TrapOwnerMask::class
+    )
+    var trapOwnerMasks: List<TrapOwnerMask> by clashProperty(emptyList())
 
-    @ClashSignedProperty(586390, 4)
-    var portTileRow: Int by clashProperty(0)
+    @ClashSignedProperty(SaveFormat.PORT_ROW_FILE_OFFSET, 4)
+    var portTileRow: Int by clashProperty(-1)
 
-    @ClashSignedProperty(586394, 4)
-    var portTileColumn: Int by clashProperty(0)
+    @ClashSignedProperty(SaveFormat.PORT_COLUMN_FILE_OFFSET, 4)
+    var portTileColumn: Int by clashProperty(-1)
 
-    @ClashSimpleProperty(586398, 4)
+    @ClashSimpleProperty(SaveFormat.PORT_NEXT_REINFORCEMENT_TURN_FILE_OFFSET, 4)
     var portNextReinforcementTurn: Int by clashProperty(0)
 
-    @ClashSimpleProperty(586402, 4)
+    @ClashSimpleProperty(SaveFormat.PORT_REINFORCEMENT_READY_FILE_OFFSET, 4)
     var portReinforcementReadyFlag: Int by clashProperty(0)
 
-    @ClashSimpleProperty(586406, 4)
-    var portReinforcementUnitCount: Int by clashProperty(0)
+    @ClashSimpleProperty(SaveFormat.PORT_REINFORCEMENT_UNIT_COUNT_FILE_OFFSET, 4)
+    var portPendingReinforcementUnitCount: Int by clashProperty(0)
 
-    @ClashSimpleProperty(586410, 4)
+    @ClashSimpleProperty(SaveFormat.PORT_SHORE_VARIANT_FILE_OFFSET, 4)
     var portShorelineVariantFlag: Int by clashProperty(0)
 
-    fun occupancyValue(tileRow: Int, tileColumn: Int): Int {
-        val index = tileRow * 100 + tileColumn
-        require(index in 0 until MAP_TILE_COUNT)
-        val byteIndex = index * 2
-        return readLittleEndianInt(occupancyLayerRaw.slice(byteIndex until byteIndex + 2))
-    }
-
-    fun occupancyAt(tileRow: Int, tileColumn: Int): OccupancyEntry {
-        val value = occupancyValue(tileRow, tileColumn)
-        return when {
-            value == OCCUPANCY_EMPTY -> OccupancyEntry.Empty
-            value in 0 until ARMY_COUNT -> OccupancyEntry.Army(value)
-            value in OCCUPANCY_BUILDING_BASE until OCCUPANCY_BUILDING_BASE + BUILDING_COUNT ->
-                OccupancyEntry.Building(value - OCCUPANCY_BUILDING_BASE)
-            else -> OccupancyEntry.Unknown(value)
+    companion object {
+        fun parse(bytes: ByteArray): Save {
+            SaveFormat.requireValidDatSize(bytes.size)
+            return Save().withBytes(bytes.toList())
         }
     }
-
-    fun trapOwnerMask(tileRow: Int, tileColumn: Int): Int {
-        val index = tileRow * 100 + tileColumn
-        require(index in trapOwnerMaskLayer.indices)
-        return trapOwnerMaskLayer[index].toInt() and 0xFF
-    }
-}
-
-sealed class OccupancyEntry {
-    data object Empty : OccupancyEntry()
-    data class Army(val armyIndex: Int) : OccupancyEntry()
-    data class Building(val buildingIndex: Int) : OccupancyEntry()
-    data class Unknown(val rawValue: Int) : OccupancyEntry()
 }
