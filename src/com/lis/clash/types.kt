@@ -90,19 +90,24 @@ data class GarrisonOrder(
         get() = (rawValue ushr 3) and 0x07
 }
 
-typealias GarrisonServiceState = GarrisonOrder
+data class UnitLicenceSlot(
+    val slotIndex: Int,
+    val typeId: Int,
+    val displayName: String?
+)
 
+@Deprecated("Use UnitTypeMetadata")
 data class CastleAddonTypeMetadata(
     val id: Int,
     val displayName: String
 )
 
-@Deprecated("Building +402 stores unit-production licence type ids, not castle add-on types")
+@Deprecated("The record at building +402 stores unit production licences; use UnitTypes")
 object CastleAddonTypes {
     const val EMPTY_SLOT = 0xFF
 
-    val all: List<CastleAddonTypeMetadata> = UnitTypes.all.map {
-        CastleAddonTypeMetadata(it.id, it.displayName)
+    val all = UnitTypes.all.map { type ->
+        CastleAddonTypeMetadata(type.id, type.displayName)
     }
 
     private val byId = all.associateBy(CastleAddonTypeMetadata::id)
@@ -110,10 +115,9 @@ object CastleAddonTypes {
     fun metadata(typeId: Int): CastleAddonTypeMetadata? = byId[typeId]
 }
 
+@Deprecated("Use UnitLicenceSlot")
 data class CastleAddonSlot(
     val slotIndex: Int,
     val typeId: Int,
     val displayName: String?
 )
-
-typealias UnitLicenceSlot = CastleAddonSlot

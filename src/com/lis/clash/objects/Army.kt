@@ -1,6 +1,10 @@
 package com.lis.clash.objects
 
-import com.lis.clash.*
+import com.lis.clash.ClashAggregateProperty
+import com.lis.clash.ClashSignedProperty
+import com.lis.clash.ClashSimpleProperty
+import com.lis.clash.QueuedPathWaypoint
+import com.lis.clash.readLittleEndianInt
 
 class Army(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSignedProperty(0, 2)
@@ -23,9 +27,6 @@ class Army(parent: ClashObject, index: Int) : ClashObject(parent, index) {
 
     @ClashSimpleProperty(720, 1)
     var isHiddenOnWorldMap: Int by clashProperty(0)
-
-    @ClashSimpleProperty(721, 4)
-    var armyFactHandle: Int by clashProperty(0)
 
     fun queuedPathWaypoints(): List<QueuedPathWaypoint> {
         val count = queuedPathWaypointCount.coerceIn(0, 100)
