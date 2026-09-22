@@ -7,12 +7,6 @@
     <list default="true" id="5287f727-f5b9-4b2a-acf3-8ae0bd41d0e3" name="Default Changelist" comment="parser working">
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clash-save-editor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/clash-save-editor.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/clash.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/clash.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/map.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/map.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/objects/Tile.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/objects/Tile.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/scripts.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/scripts.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/lis/clash/types.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/lis/clash/types.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,6 +23,23 @@
   <component name="ComposerSettings">
     <execution />
   </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="clash-save-editor" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -41,18 +52,6 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;lisu188&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/lisu188/clash-save-editor.git&quot;,
-    &quot;accountId&quot;: &quot;508d9e3b-5913-4940-9e9d-a76c9f6e64bf&quot;
-  }
-}</component>
   <component name="JupyterTrust" id="96313594-0f9e-44a0-aa7e-c7180011b4c6" />
   <component name="MavenImportPreferences">
     <option name="generalSettings">
@@ -70,9 +69,6 @@
   <component name="ProjectCodeStyleSettingsMigration">
     <option name="version" value="1" />
   </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 3
-}</component>
   <component name="ProjectId" id="1UAJl0PtvEnCVDmKrEidI12JZw0" />
   <component name="ProjectViewState">
     <option name="autoscrollFromSource" value="true" />
@@ -80,21 +76,12 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Kotlin.com.lis.clash.ClashKt.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "git-widget-placeholder": "main",
+    "node.js.selected.package.tslint": "(autodetect)"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\andrz\git\clash-save-editor\src\com\lis\clash" />
@@ -152,19 +139,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Kotlin.com.lis.clash.ClashKt" />
-      </list>
-    </recent_temporary>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.25410.129" />
-        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-IU-251.25410.129" />
-      </set>
-    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
@@ -215,10 +189,6 @@
       <workItem from="1598418829127" duration="164000" />
       <workItem from="1603279658320" duration="75000" />
       <workItem from="1621663209217" duration="424000" />
-      <workItem from="1738001254915" duration="65000" />
-      <workItem from="1738001326511" duration="419000" />
-      <workItem from="1741015042394" duration="31000" />
-      <workItem from="1750618441356" duration="3637000" />
     </task>
     <task id="LOCAL-00001" summary="add save">
       <created>1586334128000</created>
