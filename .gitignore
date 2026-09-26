@@ -6,3 +6,9 @@ build/
 .idea/
 *.iml
 *.bak
+*.bak.*
+/artifacts/
+.kotlin/
+.worktrees/
+*.clash-save-journal
+*.clash-export-journal
