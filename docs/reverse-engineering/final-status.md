@@ -17,6 +17,11 @@ documentation review. The earlier 85-test migration total belongs to
 [modernization validation](../modernization-validation.md); it is not
 a fixed test-count requirement for later revisions.
 
+The later workspace redesign is documented separately in the
+[workspace guide and UI validation record](../studio-ui.md), including its
+rendered scene coverage and incomplete native walkthrough. Its interface
+changes do not expand the binary editing or original-game acceptance scope below.
+
 ## Implemented layout and preservation
 
 The Kotlin core implements the unchanged 586414-byte DAT envelope and all fixed

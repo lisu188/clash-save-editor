@@ -24,10 +24,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Test with virtual display
         if: runner.os == 'Linux'
-        run: xvfb-run -a ./gradlew test --stacktrace --console=plain
+        run: xvfb-run -a ./gradlew test -PstudioPreviewDir=build/reports/ui --stacktrace --console=plain
       - name: Test and package Windows application
         if: runner.os == 'Windows'
-        run: ./gradlew.bat test :desktop:portableZip :mcp:fatJar --stacktrace --console=plain
+        run: ./gradlew.bat test :desktop:portableZip :mcp:fatJar -PstudioPreviewDir=build/reports/ui --stacktrace --console=plain
       - name: Verify bundled MCP runtime and protocol
         if: runner.os == 'Windows'
         shell: pwsh
@@ -40,6 +40,7 @@ jobs:
           path: |
             core/build/reports/tests/
             desktop/build/reports/tests/
+            desktop/build/reports/ui/
             mcp/build/reports/tests/
       - name: Upload Windows distribution
         if: runner.os == 'Windows'

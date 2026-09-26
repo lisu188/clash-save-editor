@@ -7,6 +7,7 @@
 | Document | Use it for |
 | --- | --- |
 | [Getting started](getting-started.md) | Toolchain, build/test/run commands, Windows distribution and the workspace workflow |
+| [Workspace guide](studio-ui.md) | Current navigation, map editing, property dialogs and UI validation evidence |
 | [MCP interface](mcp.md) | Headless startup, tool discovery, physical selectors and DAT write behavior |
 | [Developer guide](reverse-engineering/developer-guide.md) | Module ownership and changes to fields, commands and evidence |
 | [Implemented scope and status](reverse-engineering/final-status.md) | Current capabilities, repository baseline and coverage limits |
@@ -31,6 +32,7 @@ commands in Getting started and API details in the MCP interface.
 | Record | What it establishes |
 | --- | --- |
 | [Compose modernization validation](modernization-validation.md) | Dated migration tests, package smoke checks and application captures |
+| [Workspace redesign validation](studio-ui.md#verification) | Dated interaction/layout tests and Compose scene captures, with native walkthrough limits |
 | [Original-game acceptance](original-game-acceptance.md) | One documented free-game route in the unmodified retail executable, with hashes and local evidence inventory |
 | [Legacy clash95 overview](reverse-engineering/clash95-overview.md) | Compatibility entry point into the maintained format and evidence references |
 

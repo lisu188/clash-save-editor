@@ -21,6 +21,11 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
+
+// Optional images from the same rendered layout tests used in CI; no game assets required.
+tasks.withType<Test>().configureEach {
+    providers.gradleProperty("studioPreviewDir").orNull?.let { systemProperty("clash.preview.dir", it) }
+}
 compose.desktop {
     application {
         mainClass = "com.lis.clash.desktop.MainKt"
