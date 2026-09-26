@@ -1,79 +1,247 @@
 # Clash Studio
 
-A Kotlin Compose Desktop editor for Clash saves and free-game scenarios, with a headless MCP server. The map uses procedural graphics; original game artwork is not required.
+A desktop editor for **Clash saves and free-game scenarios**, built with Kotlin
+and Compose Desktop. Create a world from an empty map, edit an existing save, or
+inspect the original binary records through the desktop app and headless MCP
+server. Map graphics are procedural; original game artwork is not required.
 
-## Workspace
+![Clash Studio showing the world map, player filters, and selected army inspector](docs/images/studio-workspace.png)
 
-On launch, choose **Create scenario from scratch** or **Open existing save**.
-The editor opens a workspace after you create a scenario or successfully load a
-DAT or `.clashproj`; cancelling Open keeps the startup choices visible.
+*Actual Compose render with a generated scenario. This is the editor workspace,
+not an original-game capture.*
 
-Open a DAT or `.clashproj`, select a map tile, army, building or player, and edit its properties in the inspector. Map and filtered tables share physical record IDs. Pan, zoom, fit, layer controls and batched brushes help navigate the fixed 100×100 map. Diagnostics, reports and source bytes stay inside the workspace.
+## What you can do
 
-- **File → New scenario** creates an empty grass draft with recovered player/options defaults. Configure players and place starting armies or buildings.
-- **Save project** stores unfinished work as a versioned `.clashproj` ZIP containing the manifest, DAT image, optional FAC and document encoding.
-- **Export save** validates the scenario and writes a DAT/FAC pair. Use a separate destination, then copy both files to a numbered `save/N.dat` and `save/N.fac` slot for Clash's **Load Game** menu.
-- Undo/redo restores the complete transaction, including occupancy and supported FAC facts.
-- Shortcuts: `Ctrl+N` New, `Ctrl+O` Open, `Ctrl+S` Save project, `Ctrl+Shift+S` Export, `Ctrl+Z` Undo, `Ctrl+Y` / `Ctrl+Shift+Z` Redo.
+- **Start with a choice:** create a scenario from scratch, open a DAT or editor
+  project, or return to a recent file.
+- **Edit on the map:** pan, zoom, fit, toggle layers, place armies and buildings,
+  and paint supported terrain, roads, sites, and traps.
+- **Find and inspect:** search and filter entity tables, keep selection when
+  switching views, and use **Locate** to center a selected asset on the map.
+- **Make deliberate changes:** named player and unit choices, property dialogs
+  with Apply/Cancel and validation, and transaction-wide undo/redo.
+- **Keep the workspace readable:** light and dark themes, responsive navigation,
+  a collapsible inspector, and diagnostics, reports, and source bytes available
+  when needed. Advanced fields stay accessible without dominating everyday edits.
 
-Playable export requires at least two active players, a human player, a qualifying starting force for every active player, valid ownership/footprints, consistent occupancy and supported rules dependencies. Projects can be saved before these requirements are met.
+## Get started
 
-Use the inspector's Edit buttons to apply or cancel property changes; technical
-fields are under **Advanced properties**. **Locate** centers the selected asset
-on the map. Open **Diagnostics** from the status bar to check playability,
-review a report, or inspect source bytes. See the [workspace guide](docs/studio-ui.md)
-for navigation, editing, and visual verification details.
+### Run from source
 
-Structural editing is bounded by recovered lifecycle evidence: building types 0–2, known terrain/site/road presets, traps and supported free-game facts. Type 3 is inspectable. Campaign logic and unknown FAC forms remain lossless; structural changes are blocked when their dependencies cannot be interpreted. DAT-only files allow inspection and independent scalar edits. The editor never invents replacement campaign facts.
+Install **JDK 21**, then use the included Gradle wrapper from the repository root.
+No separate Gradle installation is needed. The desktop app requires a display
+and a window of at least 980×700.
 
-## Binary compatibility
+Windows:
 
-Clash's disk format is unchanged: **586,414-byte DAT + companion FAC**. No-op decoding/saving preserves every byte, including text, padding, unknown fields and unused slots. The original format has no version marker or checksum. DAT indexing always uses a 100-cell row stride, independently of visible bounds.
-
-Text defaults to Windows-1250 interpretation, recorded in project metadata. Choose the name encoding on the Scenario page; changing the interpretation is undoable and does not transcode existing bytes. The core API also accepts an explicit charset. Unchanged strings retain their original bytes; edits reject unrepresentable or overlong text. Packed-field edits preserve unrelated bits. Source evidence is pinned to `clash-disassembly` revision `c9c0fa7`; see [format and evidence](docs/reverse-engineering/save-format.md).
-
-DAT/FAC export stages both files, keeps uniquely named backups and writes a recovery journal. If interrupted, the application offers restoration of the previous pair before opening it. See [safety and integrity](docs/reverse-engineering/safety-and-integrity.md).
-
-## Build and run
-
-Use **JDK 21**. Gradle 8.14.4, Kotlin/compiler 2.4.20 and Compose 1.12.1 are pinned; compiled bytecode targets JVM 17. IntelliJ form instrumentation is no longer used.
-
-```sh
-./gradlew test
-./gradlew run
-./gradlew :mcp:fatJar
+```powershell
+.\gradlew.bat run
 ```
 
-Use `gradlew.bat` on Windows. Compose UI tests need a display; on headless Linux use `xvfb-run -a ./gradlew test`. Public CI uses synthetic fixtures and does not need retail assets.
+Linux or macOS:
 
-On Windows:
+```sh
+./gradlew run
+```
+
+The build pins Gradle **8.14.4**, Kotlin/compiler **2.4.20**, and Compose
+**1.12.1**. Compiled bytecode targets JVM 17; builds and packaged runtimes use
+JDK 21.
+
+### Windows portable application
+
+Build the archive on Windows:
 
 ```powershell
 .\gradlew.bat :desktop:portableZip
 ```
 
-The archive is `desktop/build/distributions/ClashSaveEditor-windows-x64.zip`. Extract it and run `ClashSaveEditor/ClashSaveEditor.exe`; the Java runtime is included. `ClashSaveMcp.cmd` runs the headless server using that same bundled runtime. The unarchived application image is under `desktop/build/compose/binaries/main/app`.
+Extract `desktop/build/distributions/ClashSaveEditor-windows-x64.zip` and launch
+`ClashSaveEditor/ClashSaveEditor.exe`. The archive includes Java, so the packaged
+app does not need a separately installed runtime. `ClashSaveMcp.cmd` at the
+archive root starts the headless server using the same bundled runtime.
 
-## MCP
+The application image is also available under
+`desktop/build/compose/binaries/main/app`. Successful Windows
+[CI runs](https://github.com/lisu188/clash-save-editor/actions/workflows/ci.yml)
+publish the portable archive as the `ClashSaveEditor-windows-x64` artifact.
 
-```sh
-./gradlew runMcpServer
-# Or after :mcp:fatJar:
+## Create or edit a scenario
+
+On launch, choose **Create scenario from scratch** or **Open existing save**.
+Cancelling Open leaves the welcome screen in place. Once a document is open,
+the **File** menu provides New, Open, and recent files.
+
+1. **Set up the world.** A new scenario starts as an empty 100×100 grass map
+   with recovered player and option defaults. Use **Players** to configure
+   active slots, human/AI control, intelligence, religion, and names.
+2. **Add starting forces.** Use **Place** on the world map to create armies and
+   supported buildings. Select an asset to edit its owner, position, properties,
+   and units in the inspector. Use the painting tools for supported map edits.
+3. **Save your draft.** **Save project** stores a `.clashproj` at any stage,
+   including unfinished scenarios. The toolbar shows whether changes are saved.
+4. **Check playability.** Open **Diagnostics** from the status bar and use
+   **Check playable save**. Structural checks and export requirements are shown
+   separately; findings remain available until the document changes.
+5. **Export for Clash.** **Export save** validates and writes the DAT/FAC pair.
+   Export to a separate destination, then copy both files to a numbered
+   `save/N.dat` and `save/N.fac` slot for the game's **Load Game** menu.
+
+Playable export requires at least two active players, at least one human,
+a valid army or qualifying building for every active player, valid ownership
+and footprints, consistent occupancy, and supported FAC dependencies. A draft
+can be saved without meeting these requirements.
+
+Existing saves use the same workspace. Map and table selections refer to
+physical records, so filtering does not change which entity is being edited.
+Undo/redo restores the full transaction, including related occupancy and
+supported FAC changes. See the [workspace guide](docs/studio-ui.md) for the
+complete interface workflow.
+
+### Keyboard shortcuts
+
+| Action | Shortcut |
+| --- | --- |
+| New scenario | `Ctrl+N` |
+| Open save or project | `Ctrl+O` |
+| Save project | `Ctrl+S` |
+| Export save | `Ctrl+Shift+S` |
+| Undo | `Ctrl+Z` |
+| Redo | `Ctrl+Y` or `Ctrl+Shift+Z` |
+| Apply / cancel a property edit | `Enter` / `Escape` |
+
+## Files and compatibility
+
+| File | Purpose |
+| --- | --- |
+| `.clashproj` | Versioned editor project archive containing a manifest, DAT image, optional FAC content, and document encoding. Supports unfinished drafts. |
+| `.dat` | Clash's fixed **586,414-byte** binary save image. |
+| `.fac` | Companion rules-engine facts, including supported player and site state and existing mission logic. |
+
+The game's DAT/FAC format is unchanged. No-op DAT/FAC round trips preserve
+original bytes and formatting, including names, padding, unknown fields, and
+unused records. The DAT format has no version marker or checksum. Its map and
+occupancy storage always use a **100-cell row stride**, independently of visible
+map bounds.
+
+Names default to **Windows-1250** interpretation. The **Scenario** page lets you
+change the document encoding without transcoding existing bytes; the choice is
+undoable and saved in project metadata. Changed text must fit the field's byte
+limit and be representable in the chosen encoding. Packed-field edits preserve
+unrelated bits.
+
+DAT/FAC export stages both files, preserves uniquely named backups, and records
+a recovery journal. If replacement is interrupted, the app offers restoration
+of the previous pair before opening it. Read the
+[safety and integrity guide](docs/reverse-engineering/safety-and-integrity.md)
+for the recovery and write guarantees.
+
+### Supported editing boundaries
+
+Structural editing follows recovered lifecycle evidence: building types **0–2**,
+supported terrain/site/road presets, traps, and known free-game facts. Building
+type **3** remains inspectable. Unknown FAC forms and campaign facts are
+preserved. Campaign saves do not support dependency-sensitive structural edits;
+unknown free-game dependencies also block operations that cannot be interpreted
+safely. Independent fields remain editable where validation permits.
+
+DAT-only inputs support inspection and independent scalar edits. Operations
+that need rules state require the companion FAC; the editor does not invent
+replacement campaign facts. New Game/Campaign menu integration, arbitrary
+objective scripting, and original-art loading are outside the current scope.
+
+The schema is pinned to `clash-disassembly` revision `c9c0fa7`. See the
+[save format](docs/reverse-engineering/save-format.md),
+[evidence and confidence](docs/reverse-engineering/clash-disassembly-evidence.md),
+and [unknown fields](docs/reverse-engineering/unknown-fields.md) for the recovered
+layout and its limits.
+
+## Headless MCP server
+
+Use the packaged `ClashSaveMcp.cmd`, or build and launch the standalone JAR:
+
+```powershell
+.\gradlew.bat :mcp:fatJar
 java -jar mcp/build/libs/mcp-2.0.0-all.jar
 ```
 
-The seven tools and JSON-RPC stdio protocol remain available: `save_get_schema`, `save_get_overview`, `save_list_entities`, `save_read_object`, `save_read_bytes`, `save_set_property` and `save_write_bytes`. Existing `objectPath` selectors keep their filtered-index meaning. For stable access use `record`, mutually exclusive with `objectPath`:
+On Linux or macOS, use `./gradlew :mcp:fatJar`. The server speaks JSON-RPC over
+stdio; configure an MCP client to launch the command and communicate through
+its standard input and output.
+
+The existing seven tools remain available:
+
+| Tool | Purpose |
+| --- | --- |
+| `save_get_schema` | Field names, ranges, evidence, and transaction requirements |
+| `save_get_overview` | Save summary |
+| `save_list_entities` | Filtered entity listing |
+| `save_read_object` | Structured record inspection |
+| `save_read_bytes` | Raw byte inspection |
+| `save_set_property` | Validated independent property edit |
+| `save_write_bytes` | Advanced raw byte write |
+
+Existing `objectPath` selectors retain their filtered-index meaning. For stable
+access, use `record` instead of `objectPath`; for example, the arguments for
+reading physical army slot 499 are:
 
 ```json
 {"path":"save/0.dat","record":{"kind":"army","slot":499}}
 ```
 
-For a unit, add `"unitSlot": 0` to an `army_unit` or `building_unit` selector. `save_get_schema` describes names, ranges, evidence and fields requiring a transaction. Structured writes share core validation; coupled fields cannot be edited independently. MCP raw-byte writes remain explicitly advanced. Writes require `outputPath` unless `inPlace=true`; in-place writes retain the established non-clobbering `.bak`, `.bak.1`, … behavior. DAT-only MCP writes leave FAC untouched.
+Unit selectors use `army_unit` or `building_unit` and add `"unitSlot": 0`.
+Structured writes use shared core validation; fields needing paired updates
+cannot be changed independently. Raw-byte writes are explicitly advanced.
+Writes require `outputPath` unless `inPlace=true`; in-place writes keep the
+non-clobbering `.bak`, `.bak.1`, … backup behavior. DAT-only MCP writes leave FAC
+untouched.
 
-## Modules and verification
+## Development and verification
 
-- `core`: byte-preserving record views, recovered schema, transactional document, FAC handling, project and pair IO.
-- `desktop`: Compose workspace and Canvas, immutable snapshots and file IO off the UI thread.
-- `mcp`: compatible headless tools and subprocess protocol.
+| Module | Responsibility |
+| --- | --- |
+| `core` | Byte-preserving record views, schema, transactional document, FAC handling, project archives, and DAT/FAC pair IO |
+| `desktop` | Compose workspace, Canvas map, immutable UI snapshots, and file IO off the UI thread |
+| `mcp` | Headless tools and the compatible subprocess protocol |
 
-See the [developer guide](docs/reverse-engineering/developer-guide.md), [invariants](docs/reverse-engineering/invariants.md) and [delivery validation](docs/modernization-validation.md). Original-game acceptance is recorded separately from automated tests. New Game/Campaign integration, arbitrary objective scripting and original-art loading are outside this editor's scope.
+Run all tests on Windows:
+
+```powershell
+.\gradlew.bat test
+```
+
+Compose tests need a display. On headless Linux:
+
+```sh
+xvfb-run -a ./gradlew test
+```
+
+To retain actual rendered UI scenes from desktop tests:
+
+```powershell
+.\gradlew.bat :desktop:test -PstudioPreviewDir=build/reports/ui --rerun-tasks
+```
+
+Images are written under `desktop/build/reports/ui`. The layout journeys cover
+980×700 and 1440×960 windows in both light and dark themes. The README screenshot
+comes from the same generated scenarios; regeneration does not need retail
+assets.
+
+After building the Windows archive, verify its bundled runtime and MCP tools:
+
+```powershell
+.\tools\test-package.ps1 -Destination artifacts/package-check
+```
+
+Choose a new destination for each package check; the script preserves existing
+output directories. Public CI runs on Windows and Linux with synthetic fixtures,
+retains test reports and UI renders, and checks the Windows package separately.
+Original-game acceptance is recorded independently from automated tests.
+
+Further documentation:
+
+- [Workspace and UI validation](docs/studio-ui.md)
+- [Developer guide](docs/reverse-engineering/developer-guide.md)
+- [Data invariants](docs/reverse-engineering/invariants.md)
+- [Modernization validation](docs/modernization-validation.md)
+- [Original-game acceptance](docs/original-game-acceptance.md)
