@@ -38,11 +38,12 @@ internal class UnsavedChangesGuard {
     }
 }
 
-class EditorState(initial: SaveDocument) {
-    var document by mutableStateOf(initial)
-        private set
-    var snapshot by mutableStateOf(initial.snapshot())
-        private set
+class EditorState(initial: SaveDocument? = null) {
+    private var currentDocument by mutableStateOf(initial)
+    private var currentSnapshot by mutableStateOf(initial?.snapshot())
+    val hasDocument: Boolean get() = currentDocument != null
+    val document: SaveDocument get() = checkNotNull(currentDocument) { "No document is open" }
+    val snapshot: DocumentSnapshot get() = checkNotNull(currentSnapshot) { "No document is open" }
     var selection by mutableStateOf<RecordId?>(null)
     var page by mutableStateOf(WorkspacePage.MAP)
     var query by mutableStateOf("")
@@ -71,13 +72,13 @@ class EditorState(initial: SaveDocument) {
         private set
 
     fun refresh(message: String? = null) {
-        snapshot = document.snapshot()
+        currentSnapshot = document.snapshot()
         if (message != null) notice = message
     }
 
     fun install(value: SaveDocument, source: Path? = null, project: Path? = null,
                 preparedSnapshot: DocumentSnapshot? = null) {
-        document = value
+        currentDocument = value
         sourcePath = source
         projectPath = project
         selection = null
@@ -85,13 +86,15 @@ class EditorState(initial: SaveDocument) {
         ownerFilter = null
         query = ""
         page = WorkspacePage.MAP
-        snapshot = preparedSnapshot ?: value.snapshot()
+        currentSnapshot = preparedSnapshot ?: value.snapshot()
+        error = null
+        recoveryPath = null
         notice = if (source != null) "Opened ${source.fileName}" else "New scenario · Place armies and buildings to prepare your world"
         if (source != null) rememberPath(source)
     }
 
     fun execute(command: EditCommand, message: String = "Edit applied") {
-        if (busy) return
+        if (busy || !hasDocument) return
         try {
             val result = document.execute(command)
             if (result != null) selection = result
@@ -102,11 +105,11 @@ class EditorState(initial: SaveDocument) {
     }
 
     fun undo() {
-        if (!busy && document.undo()) refresh("Edit undone")
+        if (!busy && hasDocument && document.undo()) refresh("Edit undone")
     }
 
     fun redo() {
-        if (!busy && document.redo()) refresh("Edit restored")
+        if (!busy && hasDocument && document.redo()) refresh("Edit restored")
     }
 
     fun select(id: RecordId, navigate: Boolean = false) {

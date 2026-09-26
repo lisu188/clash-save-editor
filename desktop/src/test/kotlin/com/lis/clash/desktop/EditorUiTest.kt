@@ -22,6 +22,75 @@ class EditorUiTest {
         compose.setContent { EditorWindow(state, actions, false, {}, {}, {}) }
     }
 
+    @Test fun startupWaitsForChoiceBeforeCreatingDirtyScenario() {
+        val state = EditorState()
+        val startupActions = actions.copy(newDocument = { state.install(SaveDocument.newScenario()) })
+        compose.setContent { EditorWindow(state, startupActions, false, {}, {}, {}) }
+        compose.onNodeWithText("Create scenario from scratch").assertIsEnabled()
+        compose.onNodeWithText("Open existing save").assertIsEnabled()
+        compose.onNodeWithText("World canvas").assertDoesNotExist()
+        compose.onNodeWithText("Save project").assertDoesNotExist()
+        compose.runOnIdle {
+            assertFalse(state.hasDocument)
+            state.undo()
+            state.redo()
+        }
+        compose.onNodeWithText("Create scenario from scratch").performClick()
+        compose.onNodeWithText("Welcome to Clash Studio").assertDoesNotExist()
+        compose.onNodeWithText("World canvas").assertExists()
+        compose.runOnIdle {
+            assertTrue(state.hasDocument)
+            assertTrue(state.document.dirty)
+            assertTrue(state.snapshot.entities.isEmpty())
+        }
+    }
+
+    @Test fun cancelledOrFailedOpenKeepsStartupUntilSuccessfulLoad() {
+        val state = EditorState()
+        var attempts = 0
+        val startupActions = actions.copy(open = {
+            attempts++
+            when (attempts) {
+                1 -> Unit // Native chooser cancelled: no document is installed.
+                2 -> state.error = "This save could not be read."
+                else -> state.install(SaveDocument.newScenario().also { it.markSaved() })
+            }
+        })
+        compose.setContent { EditorWindow(state, startupActions, false, {}, {}, {}) }
+        compose.onNodeWithText("Open existing save").performClick()
+        compose.onNodeWithText("Welcome to Clash Studio").assertExists()
+        compose.runOnIdle { assertFalse(state.hasDocument) }
+        compose.onNodeWithText("Open existing save").performClick()
+        compose.onNodeWithText("This save could not be read.").assertExists()
+        compose.onNodeWithText("Understood").performClick()
+        compose.onNodeWithText("Welcome to Clash Studio").assertExists()
+        compose.runOnIdle { assertFalse(state.hasDocument) }
+        compose.onNodeWithText("Open existing save").performClick()
+        compose.onNodeWithText("World canvas").assertExists()
+        compose.runOnIdle { assertFalse(state.document.dirty) }
+    }
+
+    @Test fun interruptedSaveCanBeRecoveredBeforeDocumentIsOpen() {
+        val state = EditorState()
+        val path = java.nio.file.Path.of("interrupted.dat")
+        state.recoveryPath = path
+        val startupActions = actions.copy(recover = {
+            state.install(SaveDocument.newScenario().also { it.markSaved() })
+        })
+        compose.setContent { EditorWindow(state, startupActions, false, {}, {}, {}) }
+        compose.onNodeWithText("Recover interrupted game save").assertExists()
+        compose.onNodeWithText("Cancel").performClick()
+        compose.onNodeWithText("Welcome to Clash Studio").assertExists()
+        compose.runOnIdle {
+            assertFalse(state.hasDocument)
+            state.recoveryPath = path
+        }
+        compose.onNodeWithText("Restore & open").performClick()
+        compose.onNodeWithText("Recover interrupted game save").assertDoesNotExist()
+        compose.onNodeWithText("World canvas").assertExists()
+        compose.runOnIdle { assertTrue(state.hasDocument) }
+    }
+
     @Test fun playerConfigurationDialogUpdatesDocument() {
         val state = EditorState(SaveDocument.newScenario())
         show(state)
