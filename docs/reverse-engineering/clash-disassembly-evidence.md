@@ -1,24 +1,34 @@
-# clash-disassembly evidence notes
+# Pinned clash-disassembly evidence
 
-These notes summarize high-confidence facts promoted from
-`../clash-disassembly/clash.c`.
+The binary schema is checked against `clash-disassembly` commit `c9c0fa7`.
+The authoritative layout is `data/save_dat_layout.json`; code anchors below
+explain interpretations. Confidence describes the field meaning, not whether a
+newly authored scenario has passed original-game acceptance.
 
-## Unit record
-- Unit creation initializes `currentActionPoints` from the unit-type table, sets health to `100`, sets fatigue to `0`, and clears the known state bits.
-- Unit health is clamped to `0..100`, fatigue to `0..100`, and morale to `0..20`.
-- Unit byte `+12` low bits `0..1` are the experience level. Values are `0..3`; `3` is the maximum tier.
-- Unit byte `+12` bits `2..3` are experience progress. The game increments progress and rolls it into the experience level when progress exceeds its local threshold.
-- Unit byte `+13` bit `2` is used by low-morale checks. Positive morale changes clear this bit.
-- Unit types `31..34` are skipped by morale and fatigue adjustment helpers.
+| Region | Evidence | Confidence |
+|---|---|---|
+| DAT envelope, fixed tables, 100-cell storage stride | `data/save_dat_layout.json`, recovered `SaveGame`/`LoadGame` | high |
+| Raw map dimensions | `Map_LoadFromFile`: MAP_WIDTH scans rows at +1400, MAP_HEIGHT scans columns at +14; screen width/height are transposed | high |
+| 27-byte options record | schema `options`; persistence `0044AE90_0044E850_persistence_005.cpp` copies 24+2+1 bytes | high; final music/brightness byte medium-high |
+| Army tail at +721 | schema `unit_stack.army_fact_handle` | high; transient runtime handle, read-only |
+| Unit +12 low two bits, bits 2..3, bits 4..6 | schema `unit_slot`: status level, order state, volleys used | high |
+| Unit +13 bits 0..3 | ready for turn, spent turn, low morale, plague | high |
+| Building +422, +432, +434, +438, +442 | seven wall integrity bytes; signed 12-bit growth; signed satisfaction; uint32 money; uint16 last income | high |
+| Building prisoners, six bytes | schema `building_prisoner_slot`; `Prisoner_SetInCastles`, `BuildingPrisoner_RecalculateRansomValue` | high |
+| Player queued prisoners, six bytes | `Prisoner_QueueCapturedUnit`, `Prisoner_SetInCastles` | high: signed type, owner, uint16 row, uint16 column |
+| Display text interpretation | configurable Windows-1250 default | interpretation only; raw bytes retained until an explicit edit |
 
-## Tile record
-- Overlay IDs `728..739` are temple/shrine overlays.
-- Terrain IDs `752` and `755` are buried treasure tiles. Digging treasure rewrites `752` to `0` and `755` to `4`.
+The old `experienceLevel` and `experienceProgress` names were inaccurate. They
+remain deprecated API aliases for `statusLevel` and `orderState` so existing MCP
+object paths keep working. They do not establish experience accumulation.
 
-## Castle record
-- Castle add-on ids decode as `0` Court, `1` Tower, `2` Hospital, `3` Barracks, `4` Workshop, `5` School, `6` Smiths, `7` Peasants, `8` Barracks, and `255` empty.
-- The original castle name pool contains generated names such as `cantown`, `stone bell`, `hopenberg`, `timbran`, and `Keep`. The save stores the actual selected name in the castle record.
+## Preservation rules
 
-## Deferred
-- The unit-type table contains more combat and movement fields, but Hex-Rays split the 88-byte records into sparse symbols. The current editor exposes formulas and fields only where the semantics are clear from code use.
-- Several unit state bits are copied and tested by combat/pathing code, but only the low-morale flag has been promoted to a named editable property.
+- Reading uses byte-backed views and never invokes a write or normalization.
+- Edits encode an entire validated scalar before applying its bounded byte patch.
+- Masked edits preserve all other packed bits. Out-of-range values are rejected.
+- Army and building tables are sparse; packed unit views stop at their first
+  `-1` type sentinel. Physical slot views expose every record, including inactive
+  and unexpected records, without deleting or rewriting them.
+- Cached CLIPS handles are runtime-local metadata, not stable record identities.
+- The original DAT remains exactly 586414 bytes. Unsupported fields remain raw.

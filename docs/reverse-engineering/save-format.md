@@ -1,5 +1,7 @@
 # Clash save-slot format
 
+Pinned schema source: `clash-disassembly` commit `c9c0fa7`, `data/save_dat_layout.json`. See [evidence and confidence](clash-disassembly-evidence.md).
+
 This document describes `save/N.dat` and the associated `save/N.fac` sidecar. It does not describe `strateg/clash.dat`, which is a separate CLIPS binary construct file.
 
 ## File pair
@@ -37,7 +39,7 @@ All recovered multibyte values are little-endian.
 | `140000` | `0x0222F0` | `24` | World/session header |
 | `140024` | `0x022308` | `7115` | Five player records, 1423 bytes each |
 | `147139` | `0x023ED3` | `8` | Turn owner and viewed player indices |
-| `147147` | `0x023EDB` | `27` | Unresolved gap |
+| `147147` | `0x023EDB` | `27` | Save-local options record |
 | `147174` | `0x023EF6` | `362500` | 500 army records, 725 bytes each |
 | `509674` | `0x07C6FA` | `46700` | 100 building records, 467 bytes each |
 | `556374` | `0x087D66` | `20000` | 100x100 uint16 occupancy layer |
@@ -66,14 +68,19 @@ file_offset = 0x10 + 14 * (100 * row + column)
 
 | DAT offset | Size | Meaning |
 |---:|---:|---|
-| `140016` | 4 | Map width |
-| `140020` | 4 | Map height |
+| `140016` | 4 | Raw `MAP_WIDTH`: row count (visual height) |
+| `140020` | 4 | Raw `MAP_HEIGHT`: column count (visual width) |
 | `140024` | 4 | Camera left |
 | `140028` | 4 | Camera top |
 | `140032` | 1 | Map theme index |
 | `140033` | 4 | Signed active mission index; `-1` means free/skirmish map |
 | `140037` | 1 | Mission failure flag |
 | `140038` | 2 | Game turn counter |
+
+The recovered variable names transpose conventional screen terminology: `MAP_WIDTH`
+bounds row scans at a 1400-byte terrain stride, and `MAP_HEIGHT` bounds columns
+at a 14-byte record stride. UI width is the raw height field; UI height is the
+raw width field. Historical scalar property names retain the raw field mapping.
 
 ## Player record
 
@@ -89,12 +96,12 @@ Five 1423-byte records begin at DAT offset `140040`.
 | `+27` | 4 | Controller mode: AI or human |
 | `+31` | 4 | AI intelligence tier |
 | `+39` | 4 | Religion/alignment flag |
-| `+47` | 1 | Technology level |
-| `+48` | 1 | Last reported technology level |
+| `+47` | 1 | Technology level in low three bits |
+| `+48` | 1 | Last reported technology level in low three bits |
 | `+49` | 4 | Battle action taken flag |
 | `+53` | 4 | Consecutive idle battle turns |
 | `+57` | 1300 | Revealed-tile bitset, 13 bytes per map row |
-| `+1357` | 60 | Ten unresolved six-byte prisoner-transfer entries |
+| `+1357` | 60 | Ten six-byte prisoner-transfer entries: int8 type, uint8 owner, uint16 row, uint16 column |
 | `+1419` | 1 | Signed queen relationship state; `-1` is meaningful |
 | `+1420` | 1 | Queen portrait index |
 | `+1421` | 2 | Next queen relationship-check turn |
@@ -105,6 +112,14 @@ Fog bit address within the 1300-byte field:
 byte_index = 13 * row + (column >> 3)
 bit_mask = 1 << (column & 7)
 ```
+
+## Options record
+
+The 27-byte record begins at DAT offset `147163`. Six int32 flags at offsets
+`+0`, `+4`, `+8`, `+12`, `+16`, `+20` represent transition animations, grid,
+status overlay, fast movement, music, and sound effects. Bytes `+24` and `+25`
+are unsigned scroll speed and sound volume. Byte `+26` is signed music volume;
+the shared options application path also uses it as palette brightness.
 
 ## Army record
 
@@ -119,7 +134,7 @@ The fixed table contains 500 records at DAT offset `147190`, each 725 bytes.
 | `+6` | 310 | Ten 31-byte unit slots |
 | `+316` | 404 | Queued path buffer |
 | `+720` | 1 | Hidden-on-world-map flag |
-| `+721` | 4 | Unresolved tail |
+| `+721` | 4 | uint32 transient CLIPS army fact handle; read-only metadata |
 
 An army is active when it contains at least one unit slot whose signed type ID is not `-1`. Empty records may occur before later active records, so the table must be scanned completely rather than stopped at the first empty record.
 
@@ -133,10 +148,12 @@ An army is active when it contains at least one unit slot whose signed type ID i
 | `+9` | 1 | Health percentage, or cargo quantity for types 31 and 32 |
 | `+10` | 1 | Fatigue |
 | `+11` | 1 | Morale |
-| `+12` | 1 | Packed stance/status/order/volley bits |
+| `+12` | 1 | Status level bits 0..1, order state bits 2..3, volleys used bits 4..6; preserve bit 7 |
 | `+13` | 1 | Runtime state flags |
 | `+18` | 4 | Transient auxiliary runtime state, cleared after load |
-| `+22` | 1 | Secondary state bits |
+| `+22` | 1 | Secondary state bits; bit 0 enables 25% base-defense bonus |
+
+Unit sequences are packed and end at the first signed type `-1`. Full physical-slot views remain available for diagnostics and repairs; unexpected data after a sentinel is never discarded.
 
 Known state flags at `+13`:
 
@@ -177,14 +194,17 @@ The fixed table contains 100 records at DAT offset `509690`, each 467 bytes. The
 | `+416` | 1 | Castle add-on flags |
 | `+420` | 1 | Construction lock flags |
 | `+421` | 1 | Wall strength |
+| `+422` | 7 | Wall-section integrity bytes |
 | `+429` | 1 | Upgrade timer |
 | `+430` | 2 | Peasant count in low 12 bits |
-| `+434` | 1 | Satisfaction |
+| `+432` | 2 | Signed population growth in low 12 bits; preserve high four bits |
+| `+434` | 1 | Signed satisfaction |
 | `+435` | 1 | Plague state in low three bits |
 | `+436` | 1 | Tax rate in low six bits |
-| `+438` | 4 | Stored money |
+| `+438` | 4 | Unsigned stored money, 0..4294967295 |
+| `+442` | 2 | Last collected gold income |
 | `+444` | 1 | Technology level in low three bits |
-| `+445` | 18 | Three unresolved six-byte prisoner slots |
+| `+445` | 18 | Three prisoner slots: int8 type, uint8 captured owner, uint8 turns held, uint8 pending action, uint16 ransom |
 | `+463` | 4 | Transient CLIPS castle fact handle |
 
 Castle add-on flags at `+416`:
@@ -240,7 +260,9 @@ The `.fac` file is CLIPS text and is required for a faithful restore. On load, t
 
 Editor rules:
 
-- Preserve every unresolved byte.
+- Preserve every unresolved byte. Merely reading or decoding a field must not normalize its bytes.
+- Text is interpreted using the selected document encoding (Windows-1250 by default); unchanged text retains its complete original field bytes. Explicit text edits reject unrepresentable characters and byte-length overflow; 11-byte player/building names reserve one byte for NUL.
+- Visible map width and height do not change the fixed 100-cell disk row stride.
 - Keep DAT output exactly `586414` bytes.
 - Copy or back up the matching FAC file with the DAT file.
 - Do not treat serialized fact handles or transient runtime dwords as stable identifiers.

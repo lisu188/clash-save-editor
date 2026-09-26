@@ -1,44 +1,56 @@
 # Safety and integrity
 
-## Current safety posture
+## Byte and transaction guarantees
 
-- The editor preserves and rewrites the complete DAT byte buffer.
-- DAT input and output must be exactly `586414` bytes.
-- Unknown and unmodeled regions are preserved unless explicitly changed through raw-byte editing.
-- Structured edits are bounded to their annotated field windows.
-- Masked writes preserve unrelated bits in the same byte window.
-- Sparse army and building tables are scanned to their full fixed counts.
+DAT input/output remains exactly **586414 bytes**, comprising a 16-byte label and
+the original raw `gameData` image. Lazy decoding never invokes a write. Untouched
+names, padding, inactive records, and unknown fields remain byte-identical.
+Explicit scalar edits reject representation overflow and string encoding/length
+errors before patching; masked edits preserve unrelated bits. Player/building
+names reserve their terminating NUL byte, while the save label permits 16 bytes.
 
-## Save-pair limitation
+Structured operations run through `SaveDocument` transactions. A failed command
+leaves both DAT and FAC unchanged. Undo/redo restores both buffers, including
+occupancy, paths, and supported rule dependencies. Raw-byte MCP writes are an
+advanced escape hatch and can violate these semantic guarantees.
 
-The DAT is only one part of a save slot. The matching FAC file contains CLIPS facts and is not modified by the DAT editor. Back up and move both files together.
+## DAT and FAC handling
 
-## Transient serialized values
+FAC is losslessly framed as CLIPS text. Independent scalar edits leave it
+unchanged. Supported free-game commands update the associated player, building,
+site, and trap facts while preserving unrelated text, whitespace, and comments.
+Unknown or malformed dependencies block structural commands. Campaign saves
+retain their existing logic; the editor does not synthesize replacement campaign
+facts. DAT-only inputs remain inspectable and permit independent scalar edits,
+but rules-dependent operations require the companion file.
 
-The original game writes the full `gameData` image, including values that are rebuilt or cleared after loading:
+Playable export validates the roster, ownership, footprints, packed units,
+occupancy, terrain range, and supported free-game FAC dependencies. Drafts can
+always be saved as versioned `.clashproj` archives before they become playable.
+Exact file size and successful validation do not prove original-game acceptance.
 
-- map-tile dwords at `+6` and `+10`;
-- unit-slot auxiliary dword at `+18`;
-- building CLIPS castle fact handle at `+463`.
+Pair export stages DAT and FAC, creates non-clobbering backups when destinations
+exist, records recovery metadata, and then replaces the destinations. Interrupted
+exports are detected through a sidecar journal; recovery restores the previous
+pair. This is recoverable two-file replacement, not a filesystem transaction
+that makes both filenames change simultaneously. Keep both resulting save files
+together when copying them into the game's numbered save slots.
 
-These values are not stable identifiers and should not be deliberately copied between unrelated saves.
+MCP retains its established single-DAT write and `.bak`, `.bak.1`, ... behavior.
+Those writes neither copy nor reconstruct FAC. Its coupled structured fields are
+blocked by the shared policy; deliberate raw writes remain the caller's responsibility.
 
-## Integrity behavior
+## Runtime state and evidence limits
 
-The recovered writer and loader show no magic value, version marker, checksum, compression, or relocation pass. The absence of validation makes malformed files more dangerous, not less. Exact size alone does not prove semantic validity.
+Tile dwords at `+6/+10`, unit auxiliary state at `+18`, army fact handle at `+721`,
+and building fact handle at `+463` are runtime state. Handles are read-only
+metadata rather than stable identities. Newly allocated records use recovered
+initialization, cloning clears fact handles, and affected movement paths/tile
+caches are invalidated by supported structural commands. Browsing a save does
+not clear any of these bytes.
 
-## Remaining risks
-
-- Raw-byte editing can corrupt records, indices, and CLIPS relationships.
-- Unknown packed bits may share bytes with editable fields.
-- Editing DAT state without corresponding FAC facts may create inconsistent rules-engine state.
-- A save from an incompatible executable build cannot be identified through an embedded format version.
-
-## Conservative usage guidance
-
-- Work on copies of both DAT and FAC files.
-- Prefer structured fields over raw writes.
-- Preserve unresolved bytes.
-- Do not edit transient handles unless debugging loader behavior.
-- Compare output size and binary diff before launching the game.
-- Validate important changes against real saves, not only synthetic fixtures.
+The original format has no embedded version, checksum, compression, or
+relocation table. Different executable variants cannot be identified by a DAT
+version tag. Preserve source evidence, keep copies, and distinguish automated
+preservation checks from the original-game acceptance recorded in
+[delivery validation](../modernization-validation.md).
