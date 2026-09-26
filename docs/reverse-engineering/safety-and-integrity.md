@@ -36,7 +36,8 @@ pair. This is recoverable two-file replacement, not a filesystem transaction
 that makes both filenames change simultaneously. Keep both resulting save files
 together when copying them into the game's numbered save slots.
 
-MCP retains its established single-DAT write and `.bak`, `.bak.1`, ... behavior.
+MCP retains its established single-DAT write and default `.bak`, `.bak.1`, ... behavior
+for in-place writes (see the [`createBackup` option](../mcp.md#writes-and-recovery)).
 Those writes neither copy nor reconstruct FAC. Its coupled structured fields are
 blocked by the shared policy; deliberate raw writes remain the caller's responsibility.
 
@@ -52,5 +53,5 @@ not clear any of these bytes.
 The original format has no embedded version, checksum, compression, or
 relocation table. Different executable variants cannot be identified by a DAT
 version tag. Preserve source evidence, keep copies, and distinguish automated
-preservation checks from the original-game acceptance recorded in
-[delivery validation](../modernization-validation.md).
+preservation checks from the separately recorded
+[original-game acceptance](../original-game-acceptance.md).

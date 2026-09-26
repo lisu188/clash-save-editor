@@ -1,8 +1,15 @@
 # Kotlin Compose modernization validation
 
-Implementation starts from remote `main` at `585393ce97528a5883ee85c85b16b15208a088e9`
-in the isolated `codex/compose-scenario-editor` worktree. Binary interpretations
-are pinned to `clash-disassembly` revision `c9c0fa7`.
+[Documentation index](README.md) · [Current reviewed baseline](reverse-engineering/final-status.md#reviewed-baseline)
+
+This is the dated validation record for the Compose migration delivered in
+[PR #16](https://github.com/lisu188/clash-save-editor/pull/16). Implementation
+started from `main` at `585393ce97528a5883ee85c85b16b15208a088e9` in the isolated
+`codex/compose-scenario-editor` worktree and merged as `9ec99e7`. Binary
+interpretations are pinned to `clash-disassembly` revision `c9c0fa7`. Counts,
+hashes and local artifact paths below describe those recorded runs, not a
+fresh validation of every subsequent revision. Current commands live in
+[Getting started](getting-started.md).
 
 ## Scope
 
@@ -44,7 +51,7 @@ matched a status-bar notice after its dialog closed; its assertion was narrowed
 to dialog controls and the full run then passed. The staged diff also passed
 `git diff --cached --check`.
 
-PR #16's initial CI run `36263098274` passed on both `ubuntu-latest` and
+PR #16's initial [CI run 36263098274](https://github.com/lisu188/clash-save-editor/actions/runs/36263098274) passed on both `ubuntu-latest` and
 `windows-latest`, including the Windows package and bundled MCP smoke test.
 
 On September 26, `:core:test` passed **62 tests in eight suites**, with no
