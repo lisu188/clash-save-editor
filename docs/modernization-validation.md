@@ -44,6 +44,9 @@ matched a status-bar notice after its dialog closed; its assertion was narrowed
 to dialog controls and the full run then passed. The staged diff also passed
 `git diff --cached --check`.
 
+PR #16's initial CI run `36263098274` passed on both `ubuntu-latest` and
+`windows-latest`, including the Windows package and bundled MCP smoke test.
+
 On September 26, `:core:test` passed **62 tests in eight suites**, with no
 failures, errors or skips. `:core:writeAcceptanceFixture` regenerated the
 586414-byte DAT and 136-byte FAC with `VALIDATION=[]`. Post-maintenance empty
@@ -84,3 +87,23 @@ Earlier September 24 startup/menu captures are incomplete attempts, not a pass.
 A successful acceptance record must separately establish Load Game entry,
 map/roster, a human action, a full turn cycle, and original-game save/reload.
 Retail-dependent checks are intentionally absent from public CI.
+
+The local harness rejects nonempty evidence destinations and checks the recorded
+Xvfb executable and display before signaling a process. Windows Git Bash syntax
+and isolated mocked checks passed for evidence preservation, stale/reused PIDs,
+wrong displays, invalid PIDs and repeated shutdown. These checks validate the
+harness safeguards, separately from original-game behavior.
+
+September 26's completed run in `original-complete-20260926/` established the
+entire acceptance sequence through the unmodified original game's UI: **Load
+Game**, map and both players' rosters, a human-player army movement, the full
+North → South → North turn cycle, save to a separate slot and reload. Inputs
+used real X11 keyboard/mouse events; no debugger or in-memory state shortcut
+was used. The earlier maintenance-interrupted run remains separate evidence.
+
+The shipped MCP server independently decoded the game-authored save as exactly
+586,414 bytes, turn **2**, North active, two active players, two armies and two
+buildings. Physical army slot 0 moved from **(4, 4)** to **(4, 3)**. A second save
+written after reload independently retained that position and turn counter.
+The original export slot remained byte-identical. Detailed hashes, frames, limitations and
+reproduction steps are in [original-game acceptance](original-game-acceptance.md).
