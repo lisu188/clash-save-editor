@@ -2,9 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - codex/recovered-full-save-layout
+    branches: [main]
   pull_request: {}
 
 permissions:
@@ -12,28 +10,40 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
       - uses: gradle/actions/setup-gradle@v4
-      - name: Run tests
-        shell: bash
-        run: |
-          set +e
-          ./gradlew test --stacktrace --console=plain 2>&1 | tee gradle-test.log
-          status=${PIPESTATUS[0]}
-          exit "$status"
-      - name: Upload Gradle test log
+      - name: Test with virtual display
+        if: runner.os == 'Linux'
+        run: xvfb-run -a ./gradlew test --stacktrace --console=plain
+      - name: Test and package Windows application
+        if: runner.os == 'Windows'
+        run: ./gradlew.bat test :desktop:portableZip :mcp:fatJar --stacktrace --console=plain
+      - name: Verify bundled MCP runtime and protocol
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tools/test-package.ps1
+      - name: Upload test evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: gradle-test-log
-          path: gradle-test.log
-      - name: Publish concise failure
-        if: failure()
-        shell: bash
-        run: grep -E '(^e: |^w: |FAILURE:|What went wrong|Execution failed|There were failing tests|> Task .*FAILED|^[[:space:]]+[A-Za-z0-9_].*Test > .*FAILED)' gradle-test.log | tail -n 200 || true
+          name: test-reports-${{ runner.os }}
+          path: |
+            core/build/reports/tests/
+            desktop/build/reports/tests/
+            mcp/build/reports/tests/
+      - name: Upload Windows distribution
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClashSaveEditor-windows-x64
+          path: desktop/build/distributions/ClashSaveEditor-windows-x64.zip
