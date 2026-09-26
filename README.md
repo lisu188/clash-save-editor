@@ -4,11 +4,20 @@ A desktop editor for **Clash saves and free-game scenarios**, built with Kotlin
 and Compose Desktop. Create a world from an empty map, edit an existing save, or
 inspect the original binary records through the desktop app and headless MCP
 server. Map graphics are procedural; original game artwork is not required.
+The repository retains the name `clash-save-editor`.
 
 ![Clash Studio showing the world map, player filters, and selected army inspector](docs/images/studio-workspace.png)
 
 *Actual Compose render with a generated scenario. This is the editor workspace,
 not an original-game capture.*
+
+## Start here
+
+- [Documentation index](docs/README.md): maintained guides, binary contracts and dated validation records.
+- [Getting started](docs/getting-started.md): canonical build, test, packaging and create/open/export instructions.
+- [Workspace guide](docs/studio-ui.md): the redesigned editing flow and UI validation evidence.
+- [MCP interface](docs/mcp.md): server startup, physical record selectors and DAT write options.
+- [Clash projects overview](https://github.com/lisu188/clash-disassembly/blob/main/docs/CLASH_PROJECTS.md): the save editor, recovered game source, HD runtime and reference assets.
 
 ## What you can do
 
@@ -192,9 +201,10 @@ reading physical army slot 499 are:
 Unit selectors use `army_unit` or `building_unit` and add `"unitSlot": 0`.
 Structured writes use shared core validation; fields needing paired updates
 cannot be changed independently. Raw-byte writes are explicitly advanced.
-Writes require `outputPath` unless `inPlace=true`; in-place writes keep the
-non-clobbering `.bak`, `.bak.1`, … backup behavior. DAT-only MCP writes leave FAC
-untouched.
+Writes require `outputPath` unless `inPlace=true`; in-place writes default to
+non-clobbering `.bak`, `.bak.1`, … backups. DAT-only MCP writes leave FAC
+untouched. See the [MCP write contract](docs/mcp.md#writes-and-recovery) for
+`createBackup`, output replacement and the distinction from DAT/FAC export.
 
 ## Development and verification
 
@@ -237,10 +247,14 @@ Choose a new destination for each package check; the script preserves existing
 output directories. Public CI runs on Windows and Linux with synthetic fixtures,
 retains test reports and UI renders, and checks the Windows package separately.
 Original-game acceptance is recorded independently from automated tests.
+The [original-game acceptance record](docs/original-game-acceptance.md) covers
+one two-player free-game fixture through load, human movement, a full turn cycle
+and save/reload; it does not establish campaign, AI or combat coverage.
 
 Further documentation:
 
 - [Workspace and UI validation](docs/studio-ui.md)
+- [Implemented scope and reviewed baseline](docs/reverse-engineering/final-status.md)
 - [Developer guide](docs/reverse-engineering/developer-guide.md)
 - [Data invariants](docs/reverse-engineering/invariants.md)
 - [Modernization validation](docs/modernization-validation.md)

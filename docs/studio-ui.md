@@ -1,5 +1,7 @@
 # Clash Studio workspace
 
+[Documentation index](README.md) · [Getting started](getting-started.md)
+
 The desktop interface uses a shared light/dark Material theme, compact controls,
 clear navigation, and a map-focused workspace. Graphics are procedural and do
 not require original game artwork.
