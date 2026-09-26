@@ -62,6 +62,9 @@ fun EditorWindow(
     val create: (String) -> Unit = { request = ActionRequest(it, state.selection) }
     MaterialTheme(colorScheme = if (dark) DarkPalette else LightPalette) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            if (!state.hasDocument) {
+                StartupScreen(state, actions, dark) { state.darkMode = !dark }
+            } else {
             Column(Modifier.fillMaxSize()) {
                 AppToolbar(state, actions, dark) { state.darkMode = !dark }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -89,6 +92,7 @@ fun EditorWindow(
                 }
                 StatusBar(state)
             }
+            }
         }
         if (state.error != null) AlertDialog(
             onDismissRequest = { state.error = null },
@@ -96,7 +100,7 @@ fun EditorWindow(
             text = { Box(Modifier.heightIn(max = 380.dp).verticalScroll(rememberScrollState())) { Text(state.error.orEmpty()) } },
             confirmButton = { TextButton(onClick = { state.error = null }) { Text("Understood") } }
         )
-        if (confirmDiscard) AlertDialog(
+        if (confirmDiscard && state.hasDocument) AlertDialog(
             onDismissRequest = onCancelDiscard,
             title = { Text("Save your changes?") },
             text = { Text("Your changes to “${state.snapshot.name}” have not been saved to an editor project.") },
