@@ -10,13 +10,19 @@ DAT or `.clashproj`; cancelling Open keeps the startup choices visible.
 
 Open a DAT or `.clashproj`, select a map tile, army, building or player, and edit its properties in the inspector. Map and filtered tables share physical record IDs. Pan, zoom, fit, layer controls and batched brushes help navigate the fixed 100×100 map. Diagnostics, reports and source bytes stay inside the workspace.
 
-- **New** creates an empty grass draft with recovered player/options defaults. Configure players and place starting armies or buildings.
+- **File → New scenario** creates an empty grass draft with recovered player/options defaults. Configure players and place starting armies or buildings.
 - **Save project** stores unfinished work as a versioned `.clashproj` ZIP containing the manifest, DAT image, optional FAC and document encoding.
-- **Export game save** validates the scenario and writes a DAT/FAC pair. Use a separate destination, then copy both files to a numbered `save/N.dat` and `save/N.fac` slot for Clash's **Load Game** menu.
+- **Export save** validates the scenario and writes a DAT/FAC pair. Use a separate destination, then copy both files to a numbered `save/N.dat` and `save/N.fac` slot for Clash's **Load Game** menu.
 - Undo/redo restores the complete transaction, including occupancy and supported FAC facts.
 - Shortcuts: `Ctrl+N` New, `Ctrl+O` Open, `Ctrl+S` Save project, `Ctrl+Shift+S` Export, `Ctrl+Z` Undo, `Ctrl+Y` / `Ctrl+Shift+Z` Redo.
 
 Playable export requires at least two active players, a human player, a qualifying starting force for every active player, valid ownership/footprints, consistent occupancy and supported rules dependencies. Projects can be saved before these requirements are met.
+
+Use the inspector's Edit buttons to apply or cancel property changes; technical
+fields are under **Advanced properties**. **Locate** centers the selected asset
+on the map. Open **Diagnostics** from the status bar to check playability,
+review a report, or inspect source bytes. See the [workspace guide](docs/studio-ui.md)
+for navigation, editing, and visual verification details.
 
 Structural editing is bounded by recovered lifecycle evidence: building types 0–2, known terrain/site/road presets, traps and supported free-game facts. Type 3 is inspectable. Campaign logic and unknown FAC forms remain lossless; structural changes are blocked when their dependencies cannot be interpreted. DAT-only files allow inspection and independent scalar edits. The editor never invents replacement campaign facts.
 
