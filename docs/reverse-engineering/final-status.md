@@ -1,4 +1,26 @@
-# Recovered save-format implementation status
+# Implemented scope and status
+
+[Documentation index](../README.md)
+
+## Reviewed baseline
+
+Documentation reviewed on **2026-09-26** against `main` revision
+[`1449731`](https://github.com/lisu188/clash-save-editor/commit/14497310f31ccba66f0c58da233434d681aad1fc),
+including the Compose migration in PR #16 and the create/open startup flow in
+PR #17. This is a dated baseline; later changes require their own verification.
+
+[CI run 36266968083](https://github.com/lisu188/clash-save-editor/actions/runs/36266968083)
+passed both Linux and Windows jobs for that revision. The Windows job built the
+portable distribution and reported `PACKAGED_MCP_OK tools=7`. This identifies
+existing CI evidence, not a new local application or retail-game test during the
+documentation review. The earlier 85-test migration total belongs to
+[modernization validation](../modernization-validation.md); it is not
+a fixed test-count requirement for later revisions.
+
+The later workspace redesign is documented separately in the
+[workspace guide and UI validation record](../studio-ui.md), including its
+rendered scene coverage and incomplete native walkthrough. Its interface
+changes do not expand the binary editing or original-game acceptance scope below.
 
 ## Implemented layout and preservation
 
@@ -44,10 +66,13 @@ packed records, command rollback/undo, occupancy/dependency updates, FAC framing
 project/export recovery, MCP subprocess contracts, and Compose interaction.
 These tests use synthetic fixtures and do not establish original-game behavior.
 
-See [delivery validation](../modernization-validation.md) for current test,
-packaging, screenshot, and original-game acceptance evidence. This status file
-describes implemented capabilities; it does not imply that loading, a human
-action, a turn cycle, and game save/reload have all been observed successfully.
+The [modernization validation record](../modernization-validation.md) retains
+dated tests, packaging and application capture evidence. The separate
+[original-game acceptance record](../original-game-acceptance.md) documents the
+2026-09-26 pass for one two-human-player free-game fixture: load, roster
+inspection, human movement, a full turn cycle and save/reload. That recorded
+route does not validate AI, campaign, combat, all editor operations or all game
+executable variants.
 
 Remaining scope limits include type-3 building lifecycle, arbitrary campaign
 objectives, unproven binary fields, original-art loading, and New Game/Campaign
