@@ -1,9 +1,14 @@
 # Pinned clash-disassembly evidence
 
 The binary schema is checked against `clash-disassembly` commit `c9c0fa7`.
-The authoritative layout is `data/save_dat_layout.json`; code anchors below
+The authoritative layout is the [pinned `data/save_dat_layout.json`](https://github.com/lisu188/clash-disassembly/blob/c9c0fa7/data/save_dat_layout.json); code anchors below
 explain interpretations. Confidence describes the field meaning, not whether a
 newly authored scenario has passed original-game acceptance.
+
+See the [documentation index](../README.md) for editor references and the
+[Clash projects overview](https://github.com/lisu188/clash-disassembly/blob/main/docs/CLASH_PROJECTS.md)
+for repository boundaries. A later source revision does not automatically
+replace this editor's evidence pin.
 
 | Region | Evidence | Confidence |
 |---|---|---|
