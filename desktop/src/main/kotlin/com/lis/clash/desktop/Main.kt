@@ -106,7 +106,7 @@ fun main(args: Array<String>) = application {
                 state.busy = true
                 scope.launch {
                 try {
-                    val issues = state.document.validate(forExport = true)
+                    val issues = state.runExportChecks()
                     val errors = issues.filter { it.severity.name == "ERROR" }
                     if (errors.isNotEmpty()) {
                         state.error = "Resolve these issues before exporting a playable save:\n\n" + errors.joinToString("\n") { "• ${it.message}" }
