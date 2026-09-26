@@ -56,8 +56,9 @@ class EditorState(initial: SaveDocument? = null) {
     var error by mutableStateOf<String?>(null)
     var recoveryPath by mutableStateOf<Path?>(null)
     var notice by mutableStateOf("Ready · Open a save or build a new scenario")
-    var bottomOpen by mutableStateOf(true)
+    var bottomOpen by mutableStateOf(false)
     var bottomTab by mutableStateOf(0)
+    var exportIssues by mutableStateOf<List<ValidationIssue>?>(null)
     var showGrid by mutableStateOf(false)
     var showTerrain by mutableStateOf(true)
     var showArmies by mutableStateOf(true)
@@ -68,11 +69,17 @@ class EditorState(initial: SaveDocument? = null) {
     var showOverlays by mutableStateOf(true)
     var showTraps by mutableStateOf(true)
     var darkMode by mutableStateOf<Boolean?>(null)
+    var inspectorOpen by mutableStateOf(true)
+    var mapFocusRequest by mutableStateOf<RecordId?>(null)
+    var mapFocusSequence by mutableStateOf(0)
     var recent by mutableStateOf(readRecent())
         private set
 
     fun refresh(message: String? = null) {
-        currentSnapshot = document.snapshot()
+        val nextSnapshot = document.snapshot()
+        // Saving a project or exporting a slot updates the status, not the validated content.
+        if (currentSnapshot?.revision != nextSnapshot.revision) exportIssues = null
+        currentSnapshot = nextSnapshot
         if (message != null) notice = message
     }
 
@@ -86,6 +93,10 @@ class EditorState(initial: SaveDocument? = null) {
         ownerFilter = null
         query = ""
         page = WorkspacePage.MAP
+        mapFocusRequest = null
+        mapFocusSequence = 0
+        bottomOpen = false
+        exportIssues = null
         currentSnapshot = preparedSnapshot ?: value.snapshot()
         error = null
         recoveryPath = null
@@ -97,7 +108,7 @@ class EditorState(initial: SaveDocument? = null) {
         if (busy || !hasDocument) return
         try {
             val result = document.execute(command)
-            if (result != null) selection = result
+            if (result != null && command !is EditCommand.SetProperty) selection = result
             refresh(message)
         } catch (failure: Exception) {
             error = failure.message ?: failure.javaClass.simpleName
@@ -114,6 +125,7 @@ class EditorState(initial: SaveDocument? = null) {
 
     fun select(id: RecordId, navigate: Boolean = false) {
         selection = id
+        inspectorOpen = true
         if (navigate) page = when (id.kind) {
             RecordKind.PLAYER -> WorkspacePage.PLAYERS
             RecordKind.ARMY, RecordKind.ARMY_UNIT -> WorkspacePage.ARMIES
@@ -121,6 +133,30 @@ class EditorState(initial: SaveDocument? = null) {
             RecordKind.SAVE, RecordKind.OPTIONS -> WorkspacePage.SCENARIO
             else -> WorkspacePage.MAP
         }
+    }
+
+    fun showOnMap(id: RecordId) {
+        select(id)
+        val kind = when (id.kind) {
+            RecordKind.ARMY_UNIT -> RecordKind.ARMY
+            RecordKind.BUILDING_UNIT -> RecordKind.BUILDING
+            else -> id.kind
+        }
+        snapshot.entities.find { it.id.kind == kind && it.id.slot == id.slot }?.let { entity ->
+            if (ownerFilter != null && ownerFilter != entity.owner) ownerFilter = null
+            if (kind == RecordKind.ARMY) showArmies = true else showBuildings = true
+        }
+        page = WorkspacePage.MAP
+        mapFocusRequest = id
+        mapFocusSequence++
+    }
+
+    fun runExportChecks(): List<ValidationIssue> {
+        val issues = document.validate(forExport = true)
+        exportIssues = issues
+        bottomOpen = true
+        bottomTab = 0
+        return issues
     }
 
     fun rememberPath(path: Path) {

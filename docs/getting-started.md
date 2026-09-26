@@ -35,7 +35,7 @@ and its assets are needed for retail acceptance.
    inspector. Map tools provide pan, zoom, fit, layer controls and batched brushes.
 3. Use **Save project** for unfinished work. The versioned `.clashproj` ZIP stores
    a manifest, DAT image, optional FAC and document text encoding.
-4. Use **Export game save** once validation succeeds. Playable export requires
+4. Use **Export save** once validation succeeds. Playable export requires
    at least two active players, a human player, a qualifying starting force for
    each active player, valid ownership/footprints, consistent occupancy and
    supported rules dependencies. [Invariants](reverse-engineering/invariants.md)
@@ -47,7 +47,7 @@ and its assets are needed for retail acceptance.
 | Action | Shortcut |
 | --- | --- |
 | New / Open | `Ctrl+N` / `Ctrl+O` |
-| Save project / Export game save | `Ctrl+S` / `Ctrl+Shift+S` |
+| Save project / Export save | `Ctrl+S` / `Ctrl+Shift+S` |
 | Undo / Redo | `Ctrl+Z` / `Ctrl+Y` or `Ctrl+Shift+Z` |
 
 Name interpretation defaults to Windows-1250. Choose the document encoding on
@@ -55,6 +55,9 @@ the Scenario page; this undoable change does not transcode existing bytes.
 Unchanged strings retain their original bytes, while edited strings must fit
 the field and selected encoding. Undo/redo restores the full transaction,
 including occupancy and supported FAC facts.
+
+The [workspace guide](studio-ui.md) covers the current File menu, recent files,
+Locate, player filters, property Apply/Cancel dialogs and diagnostics workflow.
 
 DAT/FAC export stages both files, retains uniquely named backups and writes a
 recovery journal. If interrupted, the application offers restoration of the
@@ -82,6 +85,8 @@ uses Xvfb; Windows tests, builds the portable package and MCP fat JAR, then chec
 the bundled runtime's initialize/tools-list exchange. Reports are under
 `core/build/reports/tests/`, `desktop/build/reports/tests/` and
 `mcp/build/reports/tests/`, and are uploaded as CI artifacts.
+Rendered UI scenes are retained under `desktop/build/reports/ui/`; see
+[workspace validation](studio-ui.md#verification) for capture commands and limits.
 
 These synthetic tests do not exercise a retail executable. See
 [recorded validation](README.md#recorded-validation) for the separate application
