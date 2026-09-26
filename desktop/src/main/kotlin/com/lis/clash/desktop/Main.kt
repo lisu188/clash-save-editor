@@ -32,15 +32,16 @@ data class EditorActions(
 )
 
 fun main(args: Array<String>) = application {
-    val state = remember { EditorState(SaveDocument.newScenario().also { it.markSaved() }) }
+    val state = remember { EditorState() }
     val scope = rememberCoroutineScope()
     val unsavedChanges = remember { UnsavedChangesGuard() }
     val requestGuarded: (() -> Unit) -> Unit = { action ->
-        unsavedChanges.request(state.document.dirty, action)
+        unsavedChanges.request(state.hasDocument && state.document.dirty, action)
     }
     fun error(failure: Exception) {
         state.error = failure.message ?: failure.javaClass.simpleName
-        state.notice = "Operation failed · Your document is still open"
+        state.notice = if (state.hasDocument) "Operation failed · Your document is still open"
+            else "Unable to open file · Choose another save or create a scenario"
     }
     fun load(path: Path) {
         if (state.busy) return
@@ -64,7 +65,7 @@ fun main(args: Array<String>) = application {
         }
     }
     fun save(after: (() -> Unit)? = null) {
-        if (state.busy) return
+        if (state.busy || !state.hasDocument) return
         state.busy = true
         scope.launch {
             var completed = false
@@ -87,7 +88,7 @@ fun main(args: Array<String>) = application {
     val actions = EditorActions(
         newDocument = { if (!state.busy) requestGuarded { state.install(SaveDocument.newScenario()) } },
         open = {
-            requestGuarded {
+            if (!state.busy) requestGuarded {
                 scope.launch {
                     state.busy = true
                     var path: Path? = null
@@ -101,7 +102,7 @@ fun main(args: Array<String>) = application {
         openRecent = { path -> requestGuarded { load(Path.of(path)) } },
         saveProject = { save() },
         export = {
-            if (!state.busy) {
+            if (!state.busy && state.hasDocument) {
                 state.busy = true
                 scope.launch {
                 try {
@@ -146,16 +147,16 @@ fun main(args: Array<String>) = application {
     )
     Window(
         onCloseRequest = actions.close,
-        title = "${if (state.snapshot.dirty) "● " else ""}${state.snapshot.name.ifBlank { "Untitled" }} — Clash Studio",
+        title = if (state.hasDocument) "${if (state.snapshot.dirty) "● " else ""}${state.snapshot.name.ifBlank { "Untitled" }} — Clash Studio" else "Welcome — Clash Studio",
         state = rememberWindowState(width = 1440.dp, height = 960.dp),
         onKeyEvent = { event ->
             if (event.type == KeyEventType.KeyDown && event.isCtrlPressed && !state.busy) {
                 when (event.key) {
                     Key.O -> { actions.open(); true }
                     Key.N -> { actions.newDocument(); true }
-                    Key.S -> { if (event.isShiftPressed) actions.export() else actions.saveProject(); true }
-                    Key.Z -> { if (event.isShiftPressed) state.redo() else state.undo(); true }
-                    Key.Y -> { state.redo(); true }
+                    Key.S -> if (state.hasDocument) { if (event.isShiftPressed) actions.export() else actions.saveProject(); true } else false
+                    Key.Z -> if (state.hasDocument) { if (event.isShiftPressed) state.redo() else state.undo(); true } else false
+                    Key.Y -> if (state.hasDocument) { state.redo(); true } else false
                     else -> false
                 }
             } else false

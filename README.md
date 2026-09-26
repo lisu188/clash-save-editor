@@ -4,6 +4,10 @@ A Kotlin Compose Desktop editor for Clash saves and free-game scenarios, with a 
 
 ## Workspace
 
+On launch, choose **Create scenario from scratch** or **Open existing save**.
+The editor opens a workspace after you create a scenario or successfully load a
+DAT or `.clashproj`; cancelling Open keeps the startup choices visible.
+
 Open a DAT or `.clashproj`, select a map tile, army, building or player, and edit its properties in the inspector. Map and filtered tables share physical record IDs. Pan, zoom, fit, layer controls and batched brushes help navigate the fixed 100×100 map. Diagnostics, reports and source bytes stay inside the workspace.
 
 - **New** creates an empty grass draft with recovered player/options defaults. Configure players and place starting armies or buildings.
