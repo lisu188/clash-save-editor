@@ -1,12 +1,13 @@
-# Clash Studio
+# Unofficial Clash Save Editor
 
-A desktop editor for **Clash saves and free-game scenarios**, built with Kotlin
-and Compose Desktop. Create a world from an empty map, edit an existing save, or
-inspect the original binary records through the desktop app and headless MCP
-server. Map graphics are procedural; original game artwork is not required.
+An independent, unofficial desktop editor for **Clash save files and free-game
+scenarios**, built with Kotlin and Compose Desktop. Create a world from an empty
+map, edit an existing save, or inspect binary records through the desktop app
+and headless MCP server. The project does not include the original game
+executable, artwork, audio, manual, campaign data, or other retail game assets.
 The repository retains the name `clash-save-editor`.
 
-![Clash Studio showing the world map, player filters, and selected army inspector](docs/images/studio-workspace.png)
+![Unofficial Clash Save Editor showing the world map, player filters, and selected army inspector](docs/images/studio-workspace.png)
 
 *Actual Compose render with a generated scenario. This is the editor workspace,
 not an original-game capture.*
@@ -17,7 +18,6 @@ not an original-game capture.*
 - [Getting started](docs/getting-started.md): canonical build, test, packaging and create/open/export instructions.
 - [Workspace guide](docs/studio-ui.md): the redesigned editing flow and UI validation evidence.
 - [MCP interface](docs/mcp.md): server startup, physical record selectors and DAT write options.
-- [Clash projects overview](https://github.com/lisu188/clash-disassembly/blob/main/docs/CLASH_PROJECTS.md): the save editor, recovered game source, HD runtime and reference assets.
 
 ## What you can do
 
@@ -82,7 +82,7 @@ Cancelling Open leaves the welcome screen in place. Once a document is open,
 the **File** menu provides New, Open, and recent files.
 
 1. **Set up the world.** A new scenario starts as an empty 100×100 grass map
-   with recovered player and option defaults. Use **Players** to configure
+   with documented player and option defaults. Use **Players** to configure
    active slots, human/AI control, intelligence, religion, and names.
 2. **Add starting forces.** Use **Place** on the world map to create armies and
    supported buildings. Select an asset to edit its owner, position, properties,
@@ -147,7 +147,7 @@ for the recovery and write guarantees.
 
 ### Supported editing boundaries
 
-Structural editing follows recovered lifecycle evidence: building types **0–2**,
+Structural editing follows documented compatibility behavior: building types **0–2**,
 supported terrain/site/road presets, traps, and known free-game facts. Building
 type **3** remains inspectable. Unknown FAC forms and campaign facts are
 preserved. Campaign saves do not support dependency-sensitive structural edits;
@@ -159,11 +159,13 @@ that need rules state require the companion FAC; the editor does not invent
 replacement campaign facts. New Game/Campaign menu integration, arbitrary
 objective scripting, and original-art loading are outside the current scope.
 
-The schema is pinned to `clash-disassembly` revision `c9c0fa7`. See the
+The binary compatibility contract is documented in the
 [save format](docs/reverse-engineering/save-format.md),
-[evidence and confidence](docs/reverse-engineering/clash-disassembly-evidence.md),
-and [unknown fields](docs/reverse-engineering/unknown-fields.md) for the recovered
-layout and its limits.
+[format evidence](docs/reverse-engineering/format-evidence.md), and
+[unknown fields](docs/reverse-engineering/unknown-fields.md). Public
+documentation records offsets, field behavior, confidence, and reproducible
+compatibility observations without distributing decompiler output or retail
+game files.
 
 ## Headless MCP server
 
@@ -195,7 +197,7 @@ access, use `record` instead of `objectPath`; for example, the arguments for
 reading physical army slot 499 are:
 
 ```json
-{"path":"save/0.dat","record":{"kind":"army","slot":499}}
+{"path":"example.dat","record":{"kind":"army","slot":499}}
 ```
 
 Unit selectors use `army_unit` or `building_unit` and add `"unitSlot": 0`.
@@ -205,6 +207,23 @@ Writes require `outputPath` unless `inPlace=true`; in-place writes default to
 non-clobbering `.bak`, `.bak.1`, … backups. DAT-only MCP writes leave FAC
 untouched. See the [MCP write contract](docs/mcp.md#writes-and-recovery) for
 `createBackup`, output replacement and the distinction from DAT/FAC export.
+
+## Legal and compatibility scope
+
+This project is an independent interoperability tool and is not affiliated with,
+endorsed by, or sponsored by the original game's developers, publishers, or
+rightsholders. "Clash" is used only to identify the game with which the tool is
+compatible.
+
+Repository source code, synthetic fixtures, generated UI previews, and project
+documentation are intended to be independently authored. No license to the
+original game, its executable, artwork, audio, manuals, scenarios, trademarks,
+or other third-party material is granted by this repository. Users are
+responsible for obtaining any game files they use with the editor from a lawful
+source.
+
+Retail-dependent validation is performed only against a user-supplied local copy
+and is kept outside public CI and source control.
 
 ## Development and verification
 
