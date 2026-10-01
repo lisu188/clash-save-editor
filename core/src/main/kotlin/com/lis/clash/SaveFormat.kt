@@ -1,8 +1,8 @@
 package com.lis.clash
 
 object SaveFormat {
-    const val EVIDENCE_REVISION = "c9c0fa7"
-    const val EVIDENCE_SCHEMA = "clash-disassembly/data/save_dat_layout.json"
+    const val EVIDENCE_REVISION = "public-format-spec-v1"
+    const val EVIDENCE_SCHEMA = "docs/reverse-engineering/save-format.md"
     const val LABEL_SIZE = 16
     const val GAME_DATA_SIZE = 0x8F29E
     const val DAT_SIZE = LABEL_SIZE + GAME_DATA_SIZE
