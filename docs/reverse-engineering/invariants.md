@@ -21,13 +21,13 @@
 
 A command commits DAT and FAC together or leaves both unchanged. Creation uses
 free physical slots without overwriting unexpected records. Malformed packed
-sequences block structural commands. Supported creation is limited to recovered
+sequences block structural commands. Supported creation is limited to documented
 unit types 0–34 and building types 0–2; type 3 remains inspectable.
 
 Moves, ownership changes, deletion, cloning, and unit composition maintain the
 relevant occupancy footprints, ownership references, queued paths, garrison
 service bytes, and supported FAC dependencies. Terrain/road/site painting uses
-recovered presets, active map bounds, and cache/path invalidation. Brush strokes
+documented presets, active map bounds, and cache/path invalidation. Brush strokes
 commit as one undoable transaction. Unknown FAC dependencies and campaign logic
 block structural operations whose consequences are not supported.
 
