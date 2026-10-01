@@ -12,3 +12,27 @@ build/
 .worktrees/
 *.clash-save-journal
 *.clash-export-journal
+
+# Retail game files and reverse-engineering artifacts
+/save/
+/retail/
+/reference/
+clash95.c
+*.exe
+*.dll
+*.res
+*.avi
+*.wav
+*.iso
+*.img
+*.idb
+*.i64
+*.id0
+*.id1
+*.nam
+*.til
+*.gpr
+*.rep
+*.ghidra
+*.dmp
+*.dump
