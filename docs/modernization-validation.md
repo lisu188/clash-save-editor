@@ -6,7 +6,7 @@ This is the dated validation record for the Compose migration delivered in
 [PR #16](https://github.com/lisu188/clash-save-editor/pull/16). Implementation
 started from `main` at `585393ce97528a5883ee85c85b16b15208a088e9` in the isolated
 `codex/compose-scenario-editor` worktree and merged as `9ec99e7`. Binary
-interpretations are pinned to `clash-disassembly` revision `c9c0fa7`. Counts,
+interpretations follow the public save-format specification and compatibility evidence. Counts,
 hashes and local artifact paths below describe those recorded runs, not a
 fresh validation of every subsequent revision. Current commands live in
 [Getting started](getting-started.md).
@@ -19,10 +19,10 @@ the compatible seven-tool MCP server. Game saves remain exact-size DAT files
 with companion FAC files; `.clashproj` is an editor draft container, not a new
 game format.
 
-Supported structural authoring uses recovered free-game lifecycles. Unknown FAC
+Supported structural authoring uses documented free-game lifecycles. Unknown FAC
 forms and campaign facts remain lossless but block dependency-sensitive edits.
 Type-3 buildings and unverified field lifecycles stay inspectable. Terrain and
-site brushes expose a limited source-backed palette; imported IDs are retained.
+site brushes expose a limited compatibility-tested palette; imported IDs are retained.
 No original artwork or proprietary game binary is included in public CI.
 
 ## Automated evidence
