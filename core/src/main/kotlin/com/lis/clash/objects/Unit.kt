@@ -67,7 +67,7 @@ class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSimpleProperty(22, 1, readOnly = true)
     var stateBits2: Int by clashProperty(0)
 
-    @com.lis.clash.ClashFieldEvidence(source = "clash-disassembly/src/units/0040F510_00411560_units_001.cpp:UnitStats_CalcEffectiveDefensePower")
+    @com.lis.clash.ClashFieldEvidence(source = "public save-format compatibility evidence
     @ClashMaskedProperty(22, 1, 0x01)
     var defenseBonusFlag: Int by clashProperty(0)
 
