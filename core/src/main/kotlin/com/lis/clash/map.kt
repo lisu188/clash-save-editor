@@ -69,7 +69,7 @@ data class MapRenderModel(
 }
 
 fun buildMapRenderModel(save: Save, selectedTileIndex: Int = -1): MapRenderModel {
-    // Recovered MAP_WIDTH is the row bound; MAP_HEIGHT is the column bound.
+    // The on-disk MAP_WIDTH field bounds rows; MAP_HEIGHT bounds columns.
     val width = resolvedMapWidth(save.mapHeightTiles)
     val height = resolvedMapHeight(save.mapWidthTiles, width, save.tiles.size)
     val selected = selectedTileIndex.takeIf {
