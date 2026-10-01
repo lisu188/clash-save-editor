@@ -37,7 +37,7 @@ class EditorUiTest {
             state.redo()
         }
         compose.onNodeWithText("Create scenario from scratch").performClick()
-        compose.onNodeWithText("Welcome to Clash Studio").assertDoesNotExist()
+        compose.onNodeWithText("Unofficial Clash Save Editor").assertDoesNotExist()
         compose.onNodeWithText("World canvas").assertExists()
         compose.runOnIdle {
             assertTrue(state.hasDocument)
@@ -59,12 +59,12 @@ class EditorUiTest {
         })
         compose.setContent { EditorWindow(state, startupActions, false, {}, {}, {}) }
         compose.onNodeWithText("Open existing save").performClick()
-        compose.onNodeWithText("Welcome to Clash Studio").assertExists()
+        compose.onNodeWithText("Unofficial Clash Save Editor").assertExists()
         compose.runOnIdle { assertFalse(state.hasDocument) }
         compose.onNodeWithText("Open existing save").performClick()
         compose.onNodeWithText("This save could not be read.").assertExists()
         compose.onNodeWithText("Understood").performClick()
-        compose.onNodeWithText("Welcome to Clash Studio").assertExists()
+        compose.onNodeWithText("Unofficial Clash Save Editor").assertExists()
         compose.runOnIdle { assertFalse(state.hasDocument) }
         compose.onNodeWithText("Open existing save").performClick()
         compose.onNodeWithText("World canvas").assertExists()
@@ -81,7 +81,7 @@ class EditorUiTest {
         compose.setContent { EditorWindow(state, startupActions, false, {}, {}, {}) }
         compose.onNodeWithText("Recover interrupted game save").assertExists()
         compose.onNodeWithText("Cancel").performClick()
-        compose.onNodeWithText("Welcome to Clash Studio").assertExists()
+        compose.onNodeWithText("Unofficial Clash Save Editor").assertExists()
         compose.runOnIdle {
             assertFalse(state.hasDocument)
             state.recoveryPath = path
@@ -104,13 +104,13 @@ class EditorUiTest {
             val startupActions = actions.copy(openRecent = { requestedPath = it })
             compose.setContent { EditorWindow(state, startupActions, false, {}, {}, {}) }
             compose.onNodeWithText(path.fileName.toString()).performClick()
-            compose.onNodeWithText("Welcome to Clash Studio").assertExists()
+            compose.onNodeWithText("Unofficial Clash Save Editor").assertExists()
             compose.runOnIdle {
                 assertEquals(path.toString(), requestedPath)
                 assertFalse(state.hasDocument)
                 state.install(SaveDocument.newScenario().also { it.markSaved() }, source = path)
             }
-            compose.onNodeWithText("Welcome to Clash Studio").assertDoesNotExist()
+            compose.onNodeWithText("Unofficial Clash Save Editor").assertDoesNotExist()
             compose.onNodeWithText("World canvas").assertExists()
             compose.runOnIdle {
                 assertTrue(state.hasDocument)
