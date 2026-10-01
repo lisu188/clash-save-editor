@@ -34,8 +34,8 @@ compose.desktop {
             targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Dmg)
             packageName = "ClashSaveEditor"
             packageVersion = "2.0.0"
-            description = "Clash save and scenario editor"
-            vendor = "Clash Save Editor contributors"
+            description = "Unofficial save and scenario editor compatible with Clash"
+            vendor = "Unofficial Clash Save Editor contributors"
             modules("java.desktop", "java.logging", "java.prefs", "jdk.charsets", "jdk.unsupported")
         }
     }
