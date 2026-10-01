@@ -22,13 +22,12 @@ In Windows PowerShell:
 ```
 
 The desktop needs a graphical session. Original artwork and retail game files
-are not needed to launch the editor or run its public tests. The original game
-and its assets are needed for retail acceptance.
+are not needed to launch the editor or run its public tests. A lawfully obtained local copy of the original game and its assets is required only for optional retail compatibility validation.
 
 ## Create, inspect and export
 
 1. Choose **Create scenario from scratch** or **Open existing save** on launch.
-   New creates an empty grass draft with recovered player/options defaults.
+   New creates an empty grass draft with documented compatibility defaults.
    Open accepts a DAT or a `.clashproj`; keep a DAT's matching FAC beside it.
 2. Configure players and place starting armies or buildings. Map and filtered
    tables share physical record IDs; select an entity to edit it in the
