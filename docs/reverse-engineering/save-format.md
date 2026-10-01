@@ -1,6 +1,6 @@
 # Clash save-slot format
 
-Pinned schema source: `clash-disassembly` commit `c9c0fa7`, `data/save_dat_layout.json`. See [evidence and confidence](clash-disassembly-evidence.md).
+Public compatibility reference: this document and [format evidence](format-evidence.md). The layout is maintained from reproducible save-file observations and compatibility validation; decompiler output and retail game files are not distributed with this repository.
 
 This document describes `save/N.dat` and the associated `save/N.fac` sidecar. It does not describe `strateg/clash.dat`, which is a separate CLIPS binary construct file.
 
