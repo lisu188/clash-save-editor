@@ -31,12 +31,13 @@ Read-only decoding and explicit bounded patches preserve unknown bytes and
 inactive records. Text interpretation is configurable and defaults to
 Windows-1250; untouched text is never re-encoded.
 
-Evidence is pinned to `clash-disassembly` revision `c9c0fa7`. The implemented
-corrections include status/order/volley bits, signed satisfaction and 12-bit
-population growth, unsigned 32-bit money, wall integrity, collected income,
-typed six-byte prisoner records, and read-only cached fact handles. Recovered
-map dimension names are transposed relative to screen width/height; storage
-still uses the fixed 100-cell stride.
+The implemented format contract is documented in the public
+[save-format reference](save-format.md) and [format-evidence notes](format-evidence.md).
+It includes status/order/volley bits, signed satisfaction and 12-bit population
+growth, unsigned 32-bit money, wall integrity, collected income, typed six-byte
+prisoner records, and read-only cached fact handles. The on-disk map dimension
+names are transposed relative to screen width/height; storage still uses the
+fixed 100-cell stride.
 
 ## Authoring and interfaces
 
@@ -44,7 +45,7 @@ The Compose Desktop workspace replaces the former Swing application. `core`,
 `desktop`, and `mcp` are separate Kotlin modules. The document command model
 supports undo/redo, physical record selection, supported free-game army/building
 editing, unit composition, player setup, terrain/site/road painting, and traps.
-Blank 100×100 drafts use recovered defaults and can be stored in a versioned
+Blank 100×100 drafts use documented compatibility defaults and can be stored in a versioned
 `.clashproj` independently of playable-export validation.
 
 FAC remains a separate CLIPS sidecar. It is preserved losslessly; supported
