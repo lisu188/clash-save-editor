@@ -3,7 +3,7 @@ package com.lis.clash.objects
 import com.lis.clash.ClashSignedProperty
 import com.lis.clash.ClashSimpleProperty
 
-/** Save-local options; layout pinned to clash-disassembly c9c0fa7, options[27]. */
+/** Save-local options using the documented 27-byte compatibility layout. */
 class Options(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSignedProperty(0, 4)
     var transitionAnimationsEnabled: Int by clashProperty(0)
