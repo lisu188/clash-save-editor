@@ -67,7 +67,7 @@ class Unit(parent: ClashObject, index: Int) : ClashObject(parent, index) {
     @ClashSimpleProperty(22, 1, readOnly = true)
     var stateBits2: Int by clashProperty(0)
 
-    @com.lis.clash.ClashFieldEvidence(source = "public save-format compatibility evidence
+    @com.lis.clash.ClashFieldEvidence(source = "docs/reverse-engineering/save-format.md")
     @ClashMaskedProperty(22, 1, 0x01)
     var defenseBonusFlag: Int by clashProperty(0)
 
