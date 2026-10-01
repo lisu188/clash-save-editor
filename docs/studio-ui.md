@@ -1,4 +1,4 @@
-# Clash Studio workspace
+# Unofficial Clash Save Editor workspace
 
 [Documentation index](README.md) · [Getting started](getting-started.md)
 
