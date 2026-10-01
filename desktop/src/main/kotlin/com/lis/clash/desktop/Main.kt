@@ -147,7 +147,7 @@ fun main(args: Array<String>) = application {
     )
     Window(
         onCloseRequest = actions.close,
-        title = if (state.hasDocument) "${if (state.snapshot.dirty) "● " else ""}${state.snapshot.name.ifBlank { "Untitled" }} — Clash Studio" else "Welcome — Clash Studio",
+        title = if (state.hasDocument) "${if (state.snapshot.dirty) "● " else ""}${state.snapshot.name.ifBlank { "Untitled" }} — Unofficial Clash Save Editor" else "Welcome — Unofficial Clash Save Editor",
         state = rememberWindowState(width = 1440.dp, height = 960.dp),
         onKeyEvent = { event ->
             if (event.type == KeyEventType.KeyDown && event.isCtrlPressed && !state.busy) {
