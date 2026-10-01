@@ -116,7 +116,7 @@ private fun AppToolbar(state: EditorState, actions: EditorActions, dark: Boolean
             Icon(Icons.Outlined.Map, null, Modifier.padding(9.dp).size(24.dp), tint = MaterialTheme.colorScheme.onPrimary)
         }
         if (!compact) Column(Modifier.width(110.dp)) {
-            Text("CLASH STUDIO", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text("UNOFFICIAL CLASH SAVE EDITOR", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
             Text("Scenario & save editor", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Box {
