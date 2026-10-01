@@ -136,7 +136,7 @@ class SaveDocument private constructor(dat: ByteArray, fac: ByteArray?, encoding
         if (forExport) {
             val visibleTiles = (0 until rows.coerceIn(0, 100)).flatMap { r -> (0 until columns.coerceIn(0, 100)).map { c -> r * 100 + c } }
             if (visibleTiles.any { val p = F.TILE_RECORDS_FILE_OFFSET + it * 14; b.u16(p) !in 0..1023 || listOf(b.u16(p + 2), b.u16(p + 4)).any { value -> value != 65535 && value !in 0..1023 } })
-                error("Visible terrain cannot contain empty cells or sprite IDs outside the recovered 1024-entry table")
+                error("Visible terrain cannot contain empty cells or sprite IDs outside the supported 1024-entry table")
             val active = (0..4).filter { b.int(playerOffset(it)) != 0 }
             val activeMask = active.fold(0) { mask, slot -> mask or (1 shl slot) }
             for (slot in 0 until 10000) {
@@ -370,7 +370,7 @@ class SaveDocument private constructor(dat: ByteArray, fac: ByteArray?, encoding
             }
             is EditCommand.PaintTiles -> {
                 rules()
-                command.terrain?.let { require(it in TileEditingPolicy.terrainIds) { "Terrain editing supports recovered IDs ${TileEditingPolicy.terrainIds}; port creation is unavailable" } }
+                command.terrain?.let { require(it in TileEditingPolicy.terrainIds) { "Terrain editing supports IDs ${TileEditingPolicy.terrainIds}; port creation is unavailable" } }
                 command.overlay?.let { require(it in TileEditingPolicy.overlayIds) { "Overlay editing supports religious sites 728–739 or 65535 to clear" } }
                 command.road?.let { require(it in TileEditingPolicy.roadIds) { "Road editing supports 866–876, 949–952 or 65535 to clear" } }
                 val slots = command.slots.distinct(); require(slots.all { it in 0 until 10000 })
@@ -514,10 +514,10 @@ class SaveDocument private constructor(dat: ByteArray, fac: ByteArray?, encoding
             }
         }
         private fun paired(id: RecordId, name: String) = !PropertyPolicy.canEditIndependently(id.kind, name)
-        // Source: g_UnitTypeRuntimeCoreMetadata, 0040F420 UnitSlot_InitFromType. Types 35–40 have no recovered metadata.
+        // Compatibility table for supported unit types. Types 35–40 are intentionally unsupported for creation.
         private val actionPoints = intArrayOf(24,20,20,24,22,36,32,30,32,24,20,24,20,20,16,24,26,26,18,20,26,22,26,22,40,24,34,30,24,32,36,30,30,36,36)
         private fun initUnit(b: ByteArray, p: Int, type: Int, owner: Int) {
-            require(type in actionPoints.indices) { "Unit creation supports recovered types 0–34" }
+            require(type in actionPoints.indices) { "Unit creation supports types 0–34" }
             b.fill(0, p, p + 31); b.put(p, 2, type); b[p + 2] = owner.toByte(); b[p + 8] = actionPoints[type].toByte()
             b[p + 9] = 100; b[p + 11] = (if (type in 18..30) 6 else 10).toByte()
         }
