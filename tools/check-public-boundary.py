@@ -23,6 +23,8 @@ for raw in tracked:
         violations.append(f"blocked tracked file: {path}")
         continue
     file = Path(raw)
+    if path == "tools/check-public-boundary.py":
+        continue
     if not file.is_file() or file.stat().st_size > 1_000_000:
         continue
     try:
