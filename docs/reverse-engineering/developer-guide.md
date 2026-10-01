@@ -8,15 +8,17 @@
 - `desktop` owns the Compose workspace and Canvas. Views consume immutable document snapshots and select entities by physical `RecordId` values.
 - `mcp` owns the existing seven tools and JSON-RPC stdio protocol. Legacy object paths retain their filtered-index meaning; the optional `record` selector addresses physical slots.
 
-The external reference is `clash-disassembly` commit `c9c0fa7`, especially
-`data/save_dat_layout.json` and the recovered routines cited in
-[the evidence notes](clash-disassembly-evidence.md). Kotlin annotations define
-the implemented byte windows and masks. `ClashFieldEvidence` carries exceptions
+The public compatibility reference is the repository's
+[save-format specification](save-format.md) and
+[format-evidence notes](format-evidence.md). Kotlin annotations define the
+implemented byte windows and masks. `ClashFieldEvidence` carries exceptions
 to the default confidence/source, and MCP schema responses expose that metadata.
+Changes must be justified by reproducible format observations or compatibility
+tests rather than by publishing proprietary program code.
 
 ## Working on fields and commands
 
-1. Verify the offset, signedness, packed mask, sentinel, and behavior against the pinned evidence. Preserve unknown portions and avoid promoting a guessed name.
+1. Verify the offset, signedness, packed mask, sentinel, and behavior against the documented compatibility evidence. Preserve unknown portions and avoid promoting a guessed name.
 2. Add or adjust the record field and descriptor metadata. Decoding must remain read-only; scalar delegates validate the complete replacement before applying a bounded patch. Keep runtime handles and combined diagnostic state bytes read-only.
 3. Route coupled edits through an `EditCommand`, including its DAT, occupancy, FAC, path, and ownership dependencies. Update `PropertyPolicy` so the inspector and MCP cannot bypass the command with an independent scalar write.
 4. Test byte preservation, boundary rejection, sparse/packed distinctions, and command rollback. Update the format, invariants, and evidence documents together.
@@ -31,7 +33,7 @@ structured editing.
 ## Storage and display conventions
 
 On-disk terrain, occupancy, and traps always use `100 * row + column`. The
-recovered `MAP_WIDTH` field is the row count and `MAP_HEIGHT` is the column
+documented `MAP_WIDTH` field is the row count and `MAP_HEIGHT` is the column
 count. Historical scalar property names preserve that binary mapping; desktop
 snapshots adapt it to conventional screen width and height.
 
