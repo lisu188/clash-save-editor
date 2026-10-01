@@ -89,7 +89,7 @@ private fun WelcomeHeader(dark: Boolean, toggleTheme: () -> Unit) {
             Icon(Icons.Outlined.Map, null, Modifier.padding(9.dp).size(23.dp), tint = MaterialTheme.colorScheme.onPrimary)
         }
         Column(Modifier.padding(start = 12.dp)) {
-            Text("CLASH STUDIO", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text("UNOFFICIAL CLASH SAVE EDITOR", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
             Text("Scenario & save editor", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Spacer(Modifier.weight(1f))
@@ -106,7 +106,7 @@ private fun WelcomeIntroduction(modifier: Modifier, compact: Boolean) {
         Text("YOUR NEXT WORLD STARTS HERE", style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.height(12.dp))
-        Text("Welcome to Clash Studio", style = MaterialTheme.typography.displaySmall)
+        Text("Unofficial Clash Save Editor", style = MaterialTheme.typography.displaySmall)
         Text("Shape a new scenario or return to a world in progress.", Modifier.padding(top = 10.dp),
             style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (!compact) {
