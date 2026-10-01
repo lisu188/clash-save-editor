@@ -36,7 +36,7 @@ Both game-authored DAT files are exactly 586,414 bytes.
 | Physical army 1, row/column | 12 / 12 | 12 / 12 | 12 / 12 |
 
 The human action was a normal army selection followed by a short Alt+Up key
-press. The recovered `WorldMap_RunHumanTurnLoop` implements forward movement for
+press. The documented `WorldMap_RunHumanTurnLoop` implements forward movement for
 that shortcut; starting facing 0 changes column 4 to 3. Captures show the
 animation and completed move, and the game-authored DAT independently confirms
 the new coordinates. The North and South turn banners and the displayed turn-2
@@ -156,7 +156,7 @@ determines the target; it does not inspect or patch game state. Cursor artwork
 has an approximately 8-pixel offset from its hit point, which matters when
 choosing a save row.
 
-The source-backed interaction route is:
+The compatibility-validation interaction route is:
 
 1. Main-menu Load, select slot 0, then the Load button. Verify the world before
    continuing.
@@ -173,7 +173,6 @@ The source-backed interaction route is:
    army and turn-2 counter. Save separately to slot 2 as `reloaded`, collect both
    pairs and compare them through the shipped MCP.
 
-Relevant recovered routines at pinned `clash-disassembly` revision `c9c0fa7` are
-`WorldMap_RunHumanTurnLoop`, `WorldMap_HandleTopMenuBar`, `UI_RunMenu`,
-`UI_MenuHitTestEntry`, `Game_AdvanceToNextPlayerTurn` and `SaveSlotDialog_Run`.
-Original assembly menu data at `unk_512008` confirms the Save/Load row ordering.
+The interaction sequence is retained as behavioral compatibility evidence only.
+The public repository does not publish executable-derived routine names,
+addresses, disassembly, decompiler output, or assembly data.
