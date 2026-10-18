@@ -266,6 +266,12 @@ Choose a new destination for each package check; the script preserves existing
 output directories. Public CI runs on Windows and Linux with synthetic fixtures,
 retains test reports and UI renders, and checks the Windows package separately.
 Original-game acceptance is recorded independently from automated tests.
+The [process-crash recovery matrix](docs/process-crash-recovery.md) uses actual
+child-JVM termination at seven durable DAT/FAC export boundaries, then fresh JVMs
+to check rollback/commit behavior and idempotent recovery for all four original
+file-existence combinations. The fixtures contain synthetic bytes only. This
+tests process interruption; it does not establish power-loss durability or expand
+the original game's campaign/combat acceptance scope.
 The [original-game acceptance record](docs/original-game-acceptance.md) covers
 one two-player free-game fixture through load, human movement, a full turn cycle
 and save/reload; it does not establish campaign, AI or combat coverage.

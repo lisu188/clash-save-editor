@@ -41,6 +41,7 @@ jobs:
           name: test-reports-${{ runner.os }}
           path: |
             core/build/reports/tests/
+            core/build/test-results/test/
             desktop/build/reports/tests/
             desktop/build/reports/ui/
             mcp/build/reports/tests/
