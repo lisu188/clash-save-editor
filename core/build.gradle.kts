@@ -11,6 +11,14 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
+
+tasks.test {
+    // Gradle's worker bootstrap classpath is not the test runtime classpath.
+    // Child JVM crash/recovery probes must load the same compiled core/tests.
+    doFirst {
+        systemProperty("clash.test.runtimeClasspath", sourceSets.test.get().runtimeClasspath.asPath)
+    }
+}
 tasks.register<JavaExec>("writeAcceptanceFixture") {
     dependsOn("testClasses")
     classpath = sourceSets.test.get().runtimeClasspath

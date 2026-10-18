@@ -66,6 +66,12 @@ object ProjectIO {
 
 data class ExportResult(val datPath: Path, val facPath: Path, val backups: List<Path>)
 
+/** Durable boundaries observed by the process-interruption regression helper. */
+internal enum class PairWriteCheckpoint {
+    DAT_STAGED, FAC_STAGED, BACKUPS_DURABLE, JOURNAL_DURABLE,
+    DAT_REPLACED, FAC_REPLACED, COMMITTED
+}
+
 /** DAT/FAC replacement with durable stages, non-clobbering backups and rollback journal. */
 object SaveSlotIO {
     fun load(path: Path): SaveDocument {
@@ -84,7 +90,14 @@ object SaveSlotIO {
         return writePair(document.datBytes(), requireNotNull(document.facBytes()), path)
     }
 
-    internal fun writePair(dat: ByteArray, fac: ByteArray, path: Path, afterFirstReplacement: (() -> Unit)? = null): ExportResult {
+    internal fun writePair(dat: ByteArray, fac: ByteArray, path: Path, afterFirstReplacement: (() -> Unit)? = null): ExportResult =
+        writePairWithCheckpoints(dat, fac, path, {}, afterFirstReplacement)
+
+    internal fun writePairWithCheckpoints(
+        dat: ByteArray, fac: ByteArray, path: Path,
+        checkpoint: (PairWriteCheckpoint) -> Unit,
+        afterFirstReplacement: (() -> Unit)? = null
+    ): ExportResult {
         SaveFormat.requireValidDatSize(dat.size)
         val target = path.toAbsolutePath().normalize()
         require(target.fileName.toString().endsWith(".dat", true)) { "Choose a .dat save-slot filename" }
@@ -99,19 +112,27 @@ object SaveSlotIO {
         val oldDat = Files.exists(target); val oldFac = Files.exists(sidecar)
         var journalCreated = false
         try {
-            writeDurable(datStage, dat); writeDurable(facStage, fac)
+            writeDurable(datStage, dat)
+            checkpoint(PairWriteCheckpoint.DAT_STAGED)
+            writeDurable(facStage, fac)
+            checkpoint(PairWriteCheckpoint.FAC_STAGED)
             if (oldDat) { Files.copy(target, datBackup); force(datBackup) }
             if (oldFac) { Files.copy(sidecar, facBackup); force(facBackup) }
+            checkpoint(PairWriteCheckpoint.BACKUPS_DURABLE)
             val properties = Properties().apply {
                 setProperty("version", "1"); setProperty("dat", target.fileName.toString()); setProperty("fac", sidecar.fileName.toString())
                 setProperty("token", token); setProperty("oldDat", oldDat.toString()); setProperty("oldFac", oldFac.toString())
             }
             writeDurable(journal, ByteArrayOutputStream().also { properties.store(it, "Restore both old files after an interrupted export") }.toByteArray())
             journalCreated = true
+            checkpoint(PairWriteCheckpoint.JOURNAL_DURABLE)
             replace(datStage, target)
+            checkpoint(PairWriteCheckpoint.DAT_REPLACED)
             afterFirstReplacement?.invoke()
             replace(facStage, sidecar)
+            checkpoint(PairWriteCheckpoint.FAC_REPLACED)
             Files.delete(journal)
+            checkpoint(PairWriteCheckpoint.COMMITTED)
             return ExportResult(target, sidecar, listOfNotNull(datBackup.takeIf { oldDat }, facBackup.takeIf { oldFac }))
         } catch (failure: Exception) {
             if (journalCreated) runCatching { recover(target) }.exceptionOrNull()?.let { failure.addSuppressed(it) }
