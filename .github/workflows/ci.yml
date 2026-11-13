@@ -36,7 +36,7 @@ jobs:
         run: ./tools/test-package.ps1
       - name: Upload test evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports-${{ runner.os }}
           path: |
@@ -47,7 +47,7 @@ jobs:
             mcp/build/reports/tests/
       - name: Upload Windows distribution
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ClashSaveEditor-windows-x64
           path: desktop/build/distributions/ClashSaveEditor-windows-x64.zip
