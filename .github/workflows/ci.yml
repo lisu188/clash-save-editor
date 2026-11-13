@@ -23,7 +23,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Test with virtual display
         if: runner.os == 'Linux'
         run: xvfb-run -a ./gradlew test -PstudioPreviewDir=build/reports/ui --stacktrace --console=plain
