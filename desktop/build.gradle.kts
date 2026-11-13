@@ -19,7 +19,7 @@ dependencies {
     testImplementation("org.jetbrains.compose.ui:ui-test-junit4:1.12.1")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
 }
 
 // Optional images from the same rendered layout tests used in CI; no game assets required.
