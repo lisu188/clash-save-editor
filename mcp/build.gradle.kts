@@ -8,9 +8,10 @@ dependencies {
     implementation(project(":core"))
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation(kotlin("test-junit5"))
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 application { mainClass.set("com.lis.clash.mcp.ClashSaveMcpServerKt") }
 tasks.named<JavaExec>("run") { standardInput = System.`in` }
