@@ -15,11 +15,12 @@ dependencies {
     implementation("org.jetbrains.compose.material3:material3:1.9.0")
     implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.11.0")
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.jetbrains.compose.ui:ui-test-junit4:1.12.1")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.1.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 // Optional images from the same rendered layout tests used in CI; no game assets required.
