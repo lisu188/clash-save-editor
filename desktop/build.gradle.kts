@@ -16,7 +16,7 @@ dependencies {
     implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.11.0")
     testImplementation(kotlin("test-junit5"))
-    testImplementation("org.jetbrains.compose.ui:ui-test-junit4:1.12.1")
+    testImplementation("org.jetbrains.compose.ui:ui-test-junit4:1.12.2")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.1.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
